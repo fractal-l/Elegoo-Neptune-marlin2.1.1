@@ -399,7 +399,9 @@ void startOrResumeJob() {
       }
       //planner.synchronize();//9999----停止打印后保存
       queue.enqueue_now_P(PSTR("M900 K0"));
-      queue.enqueue_now_P(PSTR("M500"));
+      // M500 removed: it wrote the whole EEPROM on every stopped print
+      // (flash wear + a multi-second stall with the fork's 20ms EEPROM
+      // delays). M900 K0 is session-only; defaults already ship K=0.
       queue.enqueue_now_P(PSTR("M84"));
       //planner.synchronize();//9999----清缓存
       
