@@ -1,0 +1,30 @@
+name: Build firmware (MKS_E3_V2)
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Build MKS_E3_V2
+        run: pio run -e MKS_E3_V2
+
+      - name: Upload firmware artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ZNP_ROBIN_NANO
+          path: .pio/build/MKS_E3_V2/ZNP_ROBIN_NANO.bin
+          if-no-files-found: error
