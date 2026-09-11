@@ -462,13 +462,21 @@ void Endstops::not_homing() {
 
       // queue.clear();
       // quickstop_stepper();
+
+      // A failed homing move leaves the axis position unknown.
+      // If a print job is active, NEVER auto-continue: stay in MF_STOPPED
+      // and require M999 to resume, otherwise subsequent print moves run
+      // without a known origin (nozzle crash risk).
+      // For a user-initiated home (from the menu), keep the Elegoo
+      // auto-recover behavior so the error page remains recoverable.
+      const bool job_active = printJobOngoing() || IS_SD_PRINTING();
       stop();
-      delay(5000);
-      
-      marlin_state = MF_RUNNING;
-      ui.reset_alert_level();
+      if (!job_active) {
+        safe_delay(5000);   // watchdog-safe wait (was a bare delay)
+        marlin_state = MF_RUNNING;
+        ui.reset_alert_level();
+      }
       //queue.flush_and_request_resend(queue.ring_buffer.command_port());
-    
 
 
       #if ENABLED(RTS_AVAILABLE)
