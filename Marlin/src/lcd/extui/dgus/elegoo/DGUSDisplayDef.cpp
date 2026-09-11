@@ -26,6 +26,7 @@
   #include "../../../../MarlinCore.h"
   #include "../../../../HAL/HAL.h"
   #include "tjc_page.h"
+  #include "fractalui.h"
   #include "../../../../core/macros.h"
   #include "../../../../inc/MarlinConfigPre.h"
   #include "../../../../module/temperature.h"
@@ -217,6 +218,10 @@
 
     probe_extrusion_temp = LEVELING_NOZZLE_TEMP;
     probe_bed_temp = LEVELING_BED_TEMP;  
+
+    // FractalUI statistics
+    fui_stats.prints = fui_stats.seconds = fui_stats.filament_mm = 0;
+    fui_eeprom_prints = fui_eeprom_seconds = fui_eeprom_filament_mm = 0;
   }
 
   inline void RTS_line_to_current(AxisEnum axis)
@@ -1225,7 +1230,7 @@
             power_off_type_yes = 1;
 
             #if ENABLED(RTS_AVAILABLE)  
-              rtscheck.RTS_SndData(ExchangePageBase, ExchangepageAddr);
+              FUI::page_index(0);
               for(count_startprogress=0;count_startprogress<=100;count_startprogress++)
               {
                 rtscheck.RTS_SndData(count_startprogress, START1_PROCESS_ICON_VP);
@@ -1286,7 +1291,7 @@
               count = 0;
 
               rtscheck.RTS_SndData(sdfilename, PRINT_FILE_TEXT_VP);
-              rtscheck.RTS_SndData(ExchangePageBase + 36, ExchangepageAddr);
+              FUI::page_index(36);
 
               #if ENABLED(TJC_AVAILABLE)
                 //continueprint
@@ -1461,14 +1466,14 @@
             power_off_type_yes = 1;
 
             #if ENABLED(RTS_AVAILABLE)
-              rtscheck.RTS_SndData(ExchangePageBase, ExchangepageAddr);
+              FUI::page_index(0);
               for(count_startprogress=0;count_startprogress<=100;count_startprogress++)
               {
                 rtscheck.RTS_SndData(count_startprogress, START1_PROCESS_ICON_VP);
                 delay(30);
               }
               rtscheck.RTS_SndData(StartSoundSet, SoundAddr);
-              rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+              FUI::page_index(1);
             #endif
 
             #if ENABLED(TJC_AVAILABLE)
@@ -1527,7 +1532,7 @@
         {
           flag_power_on = false;
           uint8_t count_startprogress = 0;
-          rtscheck.RTS_SndData(ExchangePageBase, ExchangepageAddr);
+          FUI::page_index(0);
           for(count_startprogress=0;count_startprogress<=100;count_startprogress++)
           {
             rtscheck.RTS_SndData(count_startprogress, START1_PROCESS_ICON_VP);
@@ -1536,7 +1541,7 @@
           rtscheck.RTS_SndData(StartSoundSet, SoundAddr);
           power_off_type_yes = 1;
           Update_Time_Value = RTS_UPDATE_VALUE;
-          rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+          FUI::page_index(1);
 
           #if ENABLED(TJC_AVAILABLE)
             tjc_page("boot");
@@ -1847,7 +1852,7 @@
           //       sdcard_pause_check = false;
 
           //       #if ENABLED(RTS_AVAILABLE) 
-          //         rtscheck.RTS_SndData(ExchangePageBase + 46, ExchangepageAddr);
+          //         FUI::page_index(46);
           //       #endif 
 
           //       #if ENABLED(TJC_AVAILABLE)   
@@ -1909,14 +1914,14 @@
           #if ENABLED(RTS_AVAILABLE)
             if(printingIsPaused())
             {
-              rtscheck.RTS_SndData(ExchangePageBase + 16, ExchangepageAddr); //新UI处理
+              FUI::page_index(16); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
                 tjc_page("adjusttemp");
               #endif
             }
             else
             {
-              rtscheck.RTS_SndData(ExchangePageBase + 31, ExchangepageAddr); //新UI处理
+              FUI::page_index(31); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
                 tjc_page("prefilament");
               #endif
@@ -1932,14 +1937,14 @@
           #if ENABLED(RTS_AVAILABLE)
             if(printingIsPaused())
             {
-              rtscheck.RTS_SndData(ExchangePageBase + 16, ExchangepageAddr); //新UI处理
+              FUI::page_index(16); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
                 tjc_page("adjusttemp");
               #endif
             }
             else
             {
-              rtscheck.RTS_SndData(ExchangePageBase + 31, ExchangepageAddr); //新UI处理
+              FUI::page_index(31); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
                 tjc_page("prefilament");
               #endif              
@@ -2096,7 +2101,7 @@
             #if ENABLED(DUAL_X_CARRIAGE)
               if((0 == save_dual_x_carriage_mode) && (thermalManager.temp_hotend[0].celsius <= (thermalManager.temp_hotend[0].target - 5)))
               {
-                rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                FUI::page_index(39);
                 card.pauseSDPrint();
                 print_job_timer.pause();
 
@@ -2108,7 +2113,7 @@
               }
               else if((0 != save_dual_x_carriage_mode) && ((thermalManager.temp_hotend[0].celsius <= (thermalManager.temp_hotend[0].target - 5)) || (thermalManager.temp_hotend[1].celsius <= (thermalManager.temp_hotend[1].target - 5))))
               {
-                rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                FUI::page_index(39);
                 card.pauseSDPrint();
                 print_job_timer.pause();
 
@@ -2120,7 +2125,7 @@
               }
               else if(thermalManager.temp_bed.celsius <= thermalManager.temp_bed.target)
               {
-                rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                FUI::page_index(39);
                 card.pauseSDPrint();
                 print_job_timer.pause();
 
@@ -2132,7 +2137,7 @@
               }
               else if((!TEST(axis_known_position, X_AXIS)) || (!TEST(axis_known_position, Y_AXIS)) || (!TEST(axis_known_position, Z_AXIS)))
               {
-                rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                FUI::page_index(39);
                 card.pauseSDPrint();
                 print_job_timer.pause();
 
@@ -2144,7 +2149,7 @@
               }
               else
               {
-                rtscheck.RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+                FUI::page_index(40);
                 #if ENABLED(TJC_AVAILABLE) 
                   tjc_page("wait");
                 #endif
@@ -2170,7 +2175,7 @@
                 waitway = 5;
 
                 #if ENABLED(RTS_AVAILABLE)
-                  rtscheck.RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+                  FUI::page_index(40);
                   #if ENABLED(TJC_AVAILABLE) 
                   tjc_page("wait");
                   #endif
@@ -2233,7 +2238,7 @@
     #if ENABLED(RTS_AVAILABLE)
       if(waitway == 1)
       {
-        rtscheck.RTS_SndData(ExchangePageBase + 12, ExchangepageAddr);
+        FUI::page_index(12);
         #if ENABLED(TJC_AVAILABLE)
           tjc_page("printpause");
         #endif
@@ -2241,7 +2246,7 @@
       }
       else if(waitway == 5)
       {
-        rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+        FUI::page_index(39);
         #if ENABLED(TJC_AVAILABLE)
           tjc_page("noFilamentPush");
         #endif
@@ -2253,7 +2258,7 @@
         waitway = 0;
 
         #if ENABLED(RTS_AVAILABLE)
-          rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+          FUI::page_index(1);
           #if ENABLED(TJC_AVAILABLE) 
               tjc_page("main");
           #endif
@@ -2293,7 +2298,7 @@
       waitway = 0;
 
       #if ENABLED(RTS_AVAILABLE)
-        rtscheck.RTS_SndData(ExchangePageBase + 22, ExchangepageAddr);
+        FUI::page_index(22);
       #endif
 
       #if ENABLED(TJC_AVAILABLE)
@@ -2330,7 +2335,7 @@
     {
       waitway = 0;
       #if ENABLED(RTS_AVAILABLE)
-        rtscheck.RTS_SndData(ExchangePageBase + 29 + (AxisUnitMode - 1), ExchangepageAddr);
+        FUI::page_index(29 + (AxisUnitMode - 1));
         #if ENABLED(TJC_AVAILABLE) 
           tjc_page("premove");
         #endif        
@@ -2342,9 +2347,9 @@
 
       #if ENABLED(RTS_AVAILABLE)
         #if ENABLED(HAS_LEVELING)
-          rtscheck.RTS_SndData(ExchangePageBase + 22, ExchangepageAddr);
+          FUI::page_index(22);
         #else
-          rtscheck.RTS_SndData(ExchangePageBase + 28, ExchangepageAddr);
+          FUI::page_index(28);
         #endif
       #endif
       
@@ -2378,7 +2383,7 @@
       waitway = 0;
 
       #if ENABLED(RTS_AVAILABLE)
-        rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+        FUI::page_index(1);
         #if ENABLED(TJC_AVAILABLE) 
             tjc_page("main");
         #endif
@@ -2520,7 +2525,7 @@
     LCD_SERIAL_2.printf("wait.tm0.en=0");
     LCD_SERIAL_2.printf("\xff\xff\xff");      
 
-    rtscheck.RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+    FUI::page_index(40);
     #if ENABLED(TJC_AVAILABLE) 
       tjc_page("wait");
     #endif
@@ -2579,7 +2584,7 @@
 
           if(CardReader::flag.mounted)
           {
-            RTS_SndData(ExchangePageBase + 2, ExchangepageAddr);
+            FUI::page_index(2);
 
             #if ENABLED(TJC_AVAILABLE)
               if(Multifile_flag)
@@ -2607,7 +2612,7 @@
           }
           else
           {
-            RTS_SndData(ExchangePageBase + 47, ExchangepageAddr);
+            FUI::page_index(47);
 
             #if ENABLED(TJC_AVAILABLE)
               tjc_page("nosdcard");
@@ -2631,7 +2636,7 @@
           RTS_SndData(0, PRINT_TIME_MIN_VP);
           RTS_SndData(0, PRINT_SURPLUS_TIME_HOUR_VP);
           RTS_SndData(0, PRINT_SURPLUS_TIME_MIN_VP);
-          RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+          FUI::page_index(1);
           
           #if ENABLED(TJC_AVAILABLE)
             Move_finish_flag = false;
@@ -2643,11 +2648,11 @@
           #if HAS_FAN1
             thermalManager.fan_speed[1] ? RTS_SndData(0, HEAD1_FAN_ICON_VP) : RTS_SndData(1, HEAD1_FAN_ICON_VP);
           #endif
-          RTS_SndData(ExchangePageBase + 15, ExchangepageAddr);
+          FUI::page_index(15);
         }
         else if(recdat.data[0] == 4)
         {
-          RTS_SndData(ExchangePageBase + 21, ExchangepageAddr);
+          FUI::page_index(21);
 
           if(enable_filment_check)
           {
@@ -2703,7 +2708,7 @@
               RTS_SndData(4, SELECT_MODE_ICON_VP);
             }
 
-            RTS_SndData(ExchangePageBase + 34, ExchangepageAddr);
+            FUI::page_index(34);
           #endif
         }
         else if(recdat.data[0] == 6)
@@ -2757,21 +2762,21 @@
         {
           if(printingIsPaused())
           {
-            RTS_SndData(ExchangePageBase + 12, ExchangepageAddr);
+            FUI::page_index(12);
             #if ENABLED(TJC_AVAILABLE)
               tjc_page("printpause");
             #endif
           }
           else if(printJobOngoing())
           {
-            RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
+            FUI::page_index(11);
             #if ENABLED(TJC_AVAILABLE)
                 tjc_page("printpause");
             #endif
           }
           else
           {
-            RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+            FUI::page_index(10);
             #if ENABLED(TJC_AVAILABLE)
                 tjc_page("printpause");
             #endif
@@ -2816,7 +2821,7 @@
           unit = 10;
           RTS_SndData(0, ICON_ADJUST_PRINTING_EXTRUDER_OR_BED); //默认为喷头界面
           RTS_SndData(2, ICON_ADJUST_PRINTING_TEMP_UNIT);       //默认单位调整为10
-          RTS_SndData(ExchangePageBase + 16, ExchangepageAddr);
+          FUI::page_index(16);
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("adjusttemp");
           #endif
@@ -2828,7 +2833,7 @@
           RTS_SndData(feedrate_percentage, HEAD1_SET_TEMP_VP);
           RTS_SndData(0, ICON_ADJUST_PRINTING_SPEED_FLOW); //默认为速度调整界面
           RTS_SndData(2, ICON_ADJUST_PRINTING_S_F_UNIT);   //默认单位调整为10
-          RTS_SndData(ExchangePageBase + 17, ExchangepageAddr);
+          FUI::page_index(17);
 
           #if ENABLED(TJC_AVAILABLE) 
             memset(temp,0,sizeof(temp));
@@ -2849,7 +2854,7 @@
           
           RTS_SndData(1, ICON_ADJUST_Z_OFFSET_UNIT); //默认单位为0.1mm
           RTS_SndData(1, ICON_LEVEL_SELECT);         //默认单位为0.1mm
-          RTS_SndData(ExchangePageBase + 18, ExchangepageAddr);
+          FUI::page_index(18);
 
           #if ENABLED(TJC_AVAILABLE) 
             memset(temp,0,sizeof(temp));
@@ -2908,7 +2913,7 @@
         {
           if(!Home_stop_flag)
           {
-            RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+            FUI::page_index(40);
             #if ENABLED(TJC_AVAILABLE) 
               tjc_page("wait");
             #endif
@@ -2925,21 +2930,21 @@
         {
           if(card.isPrinting)
           {
-            RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
+            FUI::page_index(11);
             #if ENABLED(TJC_AVAILABLE)
                 tjc_page("printpause");
             #endif            
           }
           else if(sdcard_pause_check == false)
           {
-            RTS_SndData(ExchangePageBase + 12, ExchangepageAddr);
+            FUI::page_index(12);
             #if ENABLED(TJC_AVAILABLE)
                 tjc_page("printpause");
             #endif  
           }
           else
           {
-            RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+            FUI::page_index(10);
             #if ENABLED(TJC_AVAILABLE)
                 tjc_page("printpause");
             #endif  
@@ -2960,7 +2965,7 @@
           LCD_SERIAL_2.printf("restFlag1=1");
           LCD_SERIAL_2.printf("\xff\xff\xff");
 
-          RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+          FUI::page_index(40);
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("wait");
           #endif
@@ -3016,21 +3021,21 @@
               #if ENABLED(DUAL_X_CARRIAGE)
                 if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT0_PIN)) && (active_extruder == 0))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                 }
                 else if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT1_PIN)) && (active_extruder == 1))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                 }
                 else if((0 != save_dual_x_carriage_mode) && ((0 == READ(CHECKFILEMENT0_PIN)) || (0 == READ(CHECKFILEMENT1_PIN))))
                 {
-                  rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                 }
               #else
                 {
                   if(0 == READ(CHECKFILEMENT0_PIN))
                   {
-                    RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                    FUI::page_index(39);
                   }                  
                 }
               #endif
@@ -3041,7 +3046,7 @@
           LCD_SERIAL_2.printf("restFlag1=0");
           LCD_SERIAL_2.printf("\xff\xff\xff");
 
-          RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+          FUI::page_index(40);
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("wait");
           #endif
@@ -3078,7 +3083,7 @@
           Update_Time_Value = 0;
           sdcard_pause_check = true;
 
-          RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
+          FUI::page_index(11);
           #if ENABLED(TJC_AVAILABLE)
             tjc_page("printpause");
           #endif 
@@ -3091,20 +3096,20 @@
               #if ENABLED(DUAL_X_CARRIAGE)
                 if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT0_PIN)) && (active_extruder == 0))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                 }
                 else if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT1_PIN)) && (active_extruder == 1))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                 }
                 else if((0 != save_dual_x_carriage_mode) && ((0 == READ(CHECKFILEMENT0_PIN)) || (0 == READ(CHECKFILEMENT1_PIN))))
                 {
-                  rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                 }
               #else
                 if((0 == READ(CHECKFILEMENT0_PIN)) && (RTS_M600_Flag==false))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                 }
               #endif
                 else
@@ -3115,7 +3120,7 @@
                     quickstop_stepper();
                     print_job_timer.stop();
 
-                    RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+                    FUI::page_index(10);
                     #if ENABLED(TJC_AVAILABLE)
                       tjc_page("printpause");
                     #endif
@@ -3145,7 +3150,7 @@
                   }
                   else
                   {
-                    RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+                    FUI::page_index(40);
 
                     #if ENABLED(TJC_AVAILABLE) 
                       tjc_page("wait");
@@ -3174,7 +3179,7 @@
                     print_job_timer.start();
                     Update_Time_Value = 0;
                     sdcard_pause_check = true;
-                    RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
+                    FUI::page_index(11);
 
                     #if ENABLED(TJC_AVAILABLE)
                       tjc_page("printpause");
@@ -3234,7 +3239,7 @@
               #endif
             }
             RTS_M600_Flag = false;
-            RTS_SndData(ExchangePageBase + 8, ExchangepageAddr);
+            FUI::page_index(8);
             #if ENABLED(TJC_AVAILABLE) 
               tjc_page("filamentresume");
             #endif
@@ -3247,24 +3252,24 @@
                 #if ENABLED(DUAL_X_CARRIAGE)
                   if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT0_PIN)) && (active_extruder == 0))
                   {
-                    RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                    FUI::page_index(39);
                     break;
                   }
                   else if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT1_PIN)) && (active_extruder == 1))
                   {
-                    RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                    FUI::page_index(39);
                     break;
                   }
                   else if((0 != save_dual_x_carriage_mode) && ((0 == READ(CHECKFILEMENT0_PIN)) || (0 == READ(CHECKFILEMENT1_PIN))))
                   {
-                    RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                    FUI::page_index(39);
                     break;
                   }
                 #else
                   {
                     if(0 == READ(CHECKFILEMENT0_PIN))
                     {
-                      RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                      FUI::page_index(39);
                       break;
                     }
                   }
@@ -3518,7 +3523,7 @@
             #endif
             PoweroffContinue = true;
 
-            RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+            FUI::page_index(10);
             // #if ENABLED(TJC_AVAILABLE)
             //   LCD_SERIAL_2.printf("page printpause");
             //   LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -3534,11 +3539,11 @@
             CardUpdate = true;
             RTS_SDCardUpate();
             // card.mount();
-            RTS_SndData(ExchangePageBase + 46, ExchangepageAddr);
+            FUI::page_index(46);
           }
           else
           {
-            RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+            FUI::page_index(40);
             #if ENABLED(TJC_AVAILABLE) 
              tjc_page("wait");
             #endif
@@ -3562,7 +3567,7 @@
             Update_Time_Value = 0;
             sdcard_pause_check = true;
             sd_printing_autopause = false;
-            RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
+            FUI::page_index(11);
             #if ENABLED(TJC_AVAILABLE)
               tjc_page("printpause");
             print_job_timer.start();        //9999----
@@ -4109,11 +4114,11 @@
           RTS_SndData(0, BED_SET_TEMP_VP);
           delay(1);
 
-          RTS_SndData(ExchangePageBase + 15, ExchangepageAddr);
+          FUI::page_index(15);
         }
         else if (recdat.data[0] == 0xF0)
         {
-          RTS_SndData(ExchangePageBase + 15, ExchangepageAddr);
+          FUI::page_index(15);
         }
 
         #if ENABLED(TJC_AVAILABLE) 
@@ -4218,7 +4223,7 @@
         }
         else if (recdat.data[0] == 4)
         {
-          RTS_SndData(ExchangePageBase + 15, ExchangepageAddr);
+          FUI::page_index(15);
         }
         else if (recdat.data[0] == 5)
         {
@@ -4398,7 +4403,7 @@
           temp_set_flag = 0x01;
           RTS_SndData(pla_extrusion_temp, PRHEAT_NOZZLE_TEMP_VP);
           RTS_SndData(pla_bed_temp, PRHEAT_BED_TEMP_VP);
-          RTS_SndData(ExchangePageBase + 35, ExchangepageAddr);
+          FUI::page_index(35);
 
           #if ENABLED(TJC_AVAILABLE)
             unit = 10;
@@ -4421,7 +4426,7 @@
           temp_set_flag = 0x02;
           RTS_SndData(petg_extrusion_temp, PRHEAT_NOZZLE_TEMP_VP);
           RTS_SndData(petg_bed_temp, PRHEAT_BED_TEMP_VP);
-          RTS_SndData(ExchangePageBase + 35, ExchangepageAddr);
+          FUI::page_index(35);
 
           #if ENABLED(TJC_AVAILABLE)
             unit = 10;
@@ -4444,7 +4449,7 @@
           temp_set_flag = 0x03;
           RTS_SndData(abs_extrusion_temp, PRHEAT_NOZZLE_TEMP_VP);
           RTS_SndData(abs_bed_temp, PRHEAT_BED_TEMP_VP);
-          RTS_SndData(ExchangePageBase + 35, ExchangepageAddr);
+          FUI::page_index(35);
 
           #if ENABLED(TJC_AVAILABLE)
             unit = 10;
@@ -4467,7 +4472,7 @@
           temp_set_flag = 0x04;
           RTS_SndData(tpu_extrusion_temp, PRHEAT_NOZZLE_TEMP_VP);
           RTS_SndData(tpu_bed_temp, PRHEAT_BED_TEMP_VP);
-          RTS_SndData(ExchangePageBase + 35, ExchangepageAddr);
+          FUI::page_index(35);
 
           #if ENABLED(TJC_AVAILABLE)
             unit = 10;
@@ -4490,7 +4495,7 @@
           temp_set_flag = 0x05;
           RTS_SndData(probe_extrusion_temp, PRHEAT_NOZZLE_TEMP_VP);
           RTS_SndData(probe_bed_temp, PRHEAT_BED_TEMP_VP);          
-          RTS_SndData(ExchangePageBase + 35, ExchangepageAddr);
+          FUI::page_index(35);
 
           #if ENABLED(TJC_AVAILABLE)
             unit = 10;
@@ -4997,7 +5002,7 @@
           AutoHomeIconNum = 0;
           queue.enqueue_now_P(PSTR("G28"));
           Update_Time_Value = 0;
-          RTS_SndData(ExchangePageBase + 32, ExchangepageAddr);
+          FUI::page_index(32);
           RTS_SndData(0, MOTOR_FREE_ICON_VP);
 
           #if ENABLED(TJC_AVAILABLE) 
@@ -5034,7 +5039,7 @@
           Update_Time_Value = 0;
           queue.enqueue_now_P(PSTR("G28"));
           queue.enqueue_now_P(PSTR("G1 F200 Z0.05"));
-          RTS_SndData(ExchangePageBase + 32, ExchangepageAddr);
+          FUI::page_index(32);
 
           #if ENABLED(TJC_AVAILABLE) 
           
@@ -5092,8 +5097,8 @@
           #endif
                                 //9999----
           delay(2);
-          //RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
-          RTS_SndData(ExchangePageBase + 32, ExchangepageAddr);
+          //FUI::page_index(23);
+          FUI::page_index(32);
 
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("autohome");
@@ -5161,12 +5166,12 @@
         }
         else if (recdat.data[0] == 4)
         {
-          RTS_SndData(ExchangePageBase + 35, ExchangepageAddr);
+          FUI::page_index(35);
         }
         else if (recdat.data[0] == 5)
         {
           RTS_SndData(CORP_WEBSITE, PRINTER_WEBSITE_TEXT_VP);
-          RTS_SndData(ExchangePageBase + 33, ExchangepageAddr);
+          FUI::page_index(33);
         }
         else if (recdat.data[0] == 6)
         {
@@ -5216,7 +5221,7 @@
         }
         else if(recdat.data[0] == 9)
         {
-          RTS_SndData(ExchangePageBase + 30, ExchangepageAddr);
+          FUI::page_index(30);
 
           #if ENABLED(TJC_AVAILABLE)
             tjc_page("pretemp");
@@ -5240,7 +5245,7 @@
         }
         else if(recdat.data[0] == 0x0A)
         {
-          RTS_SndData(ExchangePageBase + 31, ExchangepageAddr);
+          FUI::page_index(31);
 
           #if ENABLED(TJC_AVAILABLE)
             tjc_page("prefilament");
@@ -5304,9 +5309,9 @@
           if(!planner.has_blocks_queued())
           {
             #if ENABLED(HAS_LEVELING)
-              RTS_SndData(ExchangePageBase + 22, ExchangepageAddr);
+              FUI::page_index(22);
             #else
-              RTS_SndData(ExchangePageBase + 21, ExchangepageAddr);
+              FUI::page_index(21);
             #endif
             queue.enqueue_now_P(PSTR("M420 S1"));
           }
@@ -5331,7 +5336,7 @@
             sprintf_P(commandbuf, PSTR("M218 T1 Z%4.1f"), hotend_offset[1].z);
             queue.enqueue_now_P(commandbuf);
 
-            RTS_SndData(ExchangePageBase + 21, ExchangepageAddr);
+            FUI::page_index(21);
             #if ENABLED(EEPROM_SETTINGS)
               settings.save();
             #endif
@@ -5340,7 +5345,7 @@
         }
         else if(recdat.data[0] == 4)
         {
-          RTS_SndData(ExchangePageBase + 22, ExchangepageAddr);
+          FUI::page_index(22);
           #if ENABLED(EEPROM_SETTINGS)
             settings.save();
           #endif
@@ -5379,7 +5384,7 @@
             active_extruder_flag = false;
             active_extruder_font = active_extruder;
             queue.enqueue_now_P(PSTR("G28"));
-            RTS_SndData(ExchangePageBase + 32, ExchangepageAddr);
+            FUI::page_index(32);
 
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("autohome");
@@ -5543,7 +5548,7 @@
           #if HAS_BED_PROBE
             waitway = 3;
             RTS_SndData(1, AUTO_BED_LEVEL_ICON_VP);
-            RTS_SndData(ExchangePageBase + 38, ExchangepageAddr);
+            FUI::page_index(38);
             queue.enqueue_now_P(PSTR("G29"));
             planner.synchronize();
           #endif
@@ -6223,7 +6228,7 @@
         {
           if(printJobOngoing())
           {
-            RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
+            FUI::page_index(23);
             #if ENABLED(TJC_AVAILABLE) 
               tjc_page("warn1_filament");
             #endif
@@ -6239,7 +6244,7 @@
               //   #if ENABLED(CHECKFILEMENT)
               //     if(0 == READ(CHECKFILEMENT0_PIN))
               //     {
-              //       RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
+              //       FUI::page_index(20);
               //       #if ENABLED(TJC_AVAILABLE)
               //         LCD_SERIAL_2.printf("page nofilament");
               //         LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -6255,7 +6260,7 @@
               if(thermalManager.temp_hotend[0].celsius < (ChangeFilament0Temp - 5))
               {
                 RTS_SndData((int)ChangeFilament0Temp, CHANGE_FILAMENT0_TEMP_VP);
-                RTS_SndData(ExchangePageBase + 24, ExchangepageAddr);
+                FUI::page_index(24);
                 #if ENABLED(TJC_AVAILABLE)
                   tjc_page("warn2_filament");
                 #endif  
@@ -6273,7 +6278,7 @@
         {
           if(printJobOngoing())
           {
-            RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
+            FUI::page_index(23);
             #if ENABLED(TJC_AVAILABLE) 
               tjc_page("warn1_filament");
             #endif
@@ -6289,7 +6294,7 @@
               //   #if ENABLED(CHECKFILEMENT)
               //     if(0 == READ(CHECKFILEMENT0_PIN))
               //     {
-              //       RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
+              //       FUI::page_index(20);
               //       #if ENABLED(TJC_AVAILABLE)
               //         LCD_SERIAL_2.printf("page nofilament");
               //         LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -6304,7 +6309,7 @@
               if(thermalManager.temp_hotend[0].celsius < (ChangeFilament0Temp - 5))
               {
                 RTS_SndData((int)ChangeFilament0Temp, CHANGE_FILAMENT0_TEMP_VP);
-                RTS_SndData(ExchangePageBase + 24, ExchangepageAddr);
+                FUI::page_index(24);
                 #if ENABLED(TJC_AVAILABLE)
                   tjc_page("warn2_filament");
                 #endif 
@@ -6330,7 +6335,7 @@
             //     #if ENABLED(DUAL_X_CARRIAGE)
             //       if(0 == READ(CHECKFILEMENT1_PIN))
             //       {
-            //         RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
+            //         FUI::page_index(20);
             //         #if ENABLED(TJC_AVAILABLE)
             //           LCD_SERIAL_2.printf("page nofilament");
             //           LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -6348,7 +6353,7 @@
               if (thermalManager.temp_hotend[1].celsius < (ChangeFilament1Temp - 5))
               {
                 RTS_SndData((int)ChangeFilament1Temp, CHANGE_FILAMENT1_TEMP_VP);
-                RTS_SndData(ExchangePageBase + 25, ExchangepageAddr);
+                FUI::page_index(25);
               }
               else
               {
@@ -6369,7 +6374,7 @@
             //     #if ENABLED(DUAL_X_CARRIAGE)
             //       if(0 == READ(CHECKFILEMENT1_PIN))
             //       {
-            //         RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
+            //         FUI::page_index(20);
             //         #if ENABLED(TJC_AVAILABLE)
             //           LCD_SERIAL_2.printf("page nofilament");
             //           LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -6387,7 +6392,7 @@
               if(thermalManager.temp_hotend[1].celsius < (ChangeFilament1Temp - 5))
               {
                 RTS_SndData((int)ChangeFilament1Temp, CHANGE_FILAMENT1_TEMP_VP);
-                RTS_SndData(ExchangePageBase + 25, ExchangepageAddr);
+                FUI::page_index(25);
               }
               else
               {
@@ -6405,7 +6410,7 @@
             RTS_SndData(thermalManager.temp_hotend[0].celsius, HEAD0_CURRENT_TEMP_VP);
             thermalManager.setTargetHotend(ChangeFilament0Temp, 0);
             RTS_SndData(ChangeFilament0Temp, HEAD0_SET_TEMP_VP);
-            RTS_SndData(ExchangePageBase + 26, ExchangepageAddr);
+            FUI::page_index(26);
             #if ENABLED(TJC_AVAILABLE)
               tjc_page("heatfilament");
             #endif 
@@ -6420,8 +6425,8 @@
             Filament1LOAD = 10;
             RTS_SndData(10 * Filament0LOAD, HEAD0_FILAMENT_LOAD_DATA_VP);
             RTS_SndData(10 * Filament1LOAD, HEAD1_FILAMENT_LOAD_DATA_VP);
-            //RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
-            RTS_SndData(ExchangePageBase + 31, ExchangepageAddr);
+            //FUI::page_index(23);
+            FUI::page_index(31);
             #if ENABLED(TJC_AVAILABLE)
               tjc_page("prefilament");
             #endif 
@@ -6437,7 +6442,7 @@
             #endif
             thermalManager.setTargetHotend(ChangeFilament1Temp, 1);
             RTS_SndData(ChangeFilament1Temp, HEAD1_SET_TEMP_VP);
-            RTS_SndData(ExchangePageBase + 26, ExchangepageAddr);
+            FUI::page_index(26);
             #if ENABLED(TJC_AVAILABLE)
               tjc_page("heatfilament");
             #endif 
@@ -6452,13 +6457,13 @@
             Filament1LOAD = 10;
             RTS_SndData(10 * Filament0LOAD, HEAD0_FILAMENT_LOAD_DATA_VP);
             RTS_SndData(10 * Filament1LOAD, HEAD1_FILAMENT_LOAD_DATA_VP);
-            //RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
-            RTS_SndData(ExchangePageBase + 31, ExchangepageAddr);
+            //FUI::page_index(23);
+            FUI::page_index(31);
           }
         }
         else if(recdat.data[0] == 9)
         {
-            RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
+            FUI::page_index(40);
             
             #if ENABLED(TJC_AVAILABLE) 
               tjc_page("wait");
@@ -6554,8 +6559,8 @@
             thermalManager.temp_hotend[1].target = 0;
             RTS_SndData(thermalManager.temp_hotend[1].target, HEAD1_SET_TEMP_VP);
           #endif
-            //RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
-            RTS_SndData(ExchangePageBase + 31, ExchangepageAddr);
+            //FUI::page_index(23);
+            FUI::page_index(31);
             Filament0LOAD = 10;
             Filament1LOAD = 10;
             RTS_SndData(10 * Filament0LOAD, HEAD0_FILAMENT_LOAD_DATA_VP);
@@ -6587,14 +6592,14 @@
               #if ENABLED(DUAL_X_CARRIAGE)
                 if((0 == READ(CHECKFILEMENT0_PIN)) && (active_extruder == 0))
                 {
-                  RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
+                  FUI::page_index(20);
                   #if ENABLED(TJC_AVAILABLE)
                       tjc_page("nofilament");
                   #endif      
                 }
                 else if((0 == READ(CHECKFILEMENT1_PIN)) && (active_extruder == 1))
                 {
-                  RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
+                  FUI::page_index(20);
                   #if ENABLED(TJC_AVAILABLE)
                       tjc_page("nofilament");
                   #endif 
@@ -6602,7 +6607,7 @@
               #else
                 if(0 == READ(CHECKFILEMENT0_PIN))
                 {
-                  RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
+                  FUI::page_index(20);
                   #if ENABLED(TJC_AVAILABLE)
                       tjc_page("nofilament");
                   #endif 
@@ -6610,15 +6615,15 @@
               #endif
                 else
                 {
-                  //RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
-                  RTS_SndData(ExchangePageBase + 31, ExchangepageAddr);
+                  //FUI::page_index(23);
+                  FUI::page_index(31);
                 }
             #endif
           }
         }
         else if (recdat.data[0] == 2)
         {
-          RTS_SndData(ExchangePageBase + 21, ExchangepageAddr);
+          FUI::page_index(21);
           Filament0LOAD = 10;
           Filament1LOAD = 10;
         }
@@ -6655,7 +6660,7 @@
               power_off_type_yes = 1;
               Update_Time_Value  = 0;
               
-              RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+              FUI::page_index(10);
               #if ENABLED(TJC_AVAILABLE)
                 restFlag2 = 0;
                 LCD_SERIAL_2.printf("restFlag2=0");
@@ -6693,7 +6698,7 @@
             dual_x_carriage_mode = DEFAULT_DUAL_X_CARRIAGE_MODE;
             active_extruder = 0;
           #endif
-          RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+          FUI::page_index(1);
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("main");
           #endif
@@ -6786,7 +6791,7 @@
           }
           RTS_SndData((unsigned long)0x073F, FilenameNature + recdat.data[0] * 16);
           RTS_SndData(1, FILE1_SELECT_ICON_VP + (recdat.data[0] - 1));
-          RTS_SndData(ExchangePageBase + 28, ExchangepageAddr);
+          FUI::page_index(28);
 
           #if ENABLED(TJC_AVAILABLE)
             tjc_page("askprint");
@@ -7008,19 +7013,19 @@
               #if ENABLED(DUAL_X_CARRIAGE)
                 if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT0_PIN)) && (active_extruder == 0))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                   sdcard_pause_check = false;
                   break;
                 }
                 else if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT1_PIN)) && (active_extruder == 1))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                   sdcard_pause_check = false;
                   break;
                 }
                 else if((0 != save_dual_x_carriage_mode) && ((0 == READ(CHECKFILEMENT0_PIN)) || (0 == READ(CHECKFILEMENT1_PIN))))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                   sdcard_pause_check = false;
                   break;
                 }
@@ -7028,7 +7033,7 @@
                 {
                   if(0 == READ(CHECKFILEMENT0_PIN))
                   {
-                    RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                    FUI::page_index(39);
                     #if ENABLED(TJC_AVAILABLE)
                       tjc_page("nofilament");
                     #endif                    
@@ -7080,7 +7085,7 @@
           PoweroffContinue = true;
 
           //切换正在打印页面
-          RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+          FUI::page_index(10);
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("printpause");
 
@@ -7307,19 +7312,19 @@
               #if ENABLED(DUAL_X_CARRIAGE)
                 if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT0_PIN)) && (active_extruder == 0))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                   sdcard_pause_check = false;
                   break;
                 }
                 else if((0 == save_dual_x_carriage_mode) && (0 == READ(CHECKFILEMENT1_PIN)) && (active_extruder == 1))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                   sdcard_pause_check = false;
                   break;
                 }
                 else if((0 != save_dual_x_carriage_mode) && ((0 == READ(CHECKFILEMENT0_PIN)) || (0 == READ(CHECKFILEMENT1_PIN))))
                 {
-                  RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                  FUI::page_index(39);
                   sdcard_pause_check = false;
                   break;
                 }
@@ -7327,7 +7332,7 @@
                 {
                   if(0 == READ(CHECKFILEMENT0_PIN))
                   {
-                    RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
+                    FUI::page_index(39);
                     #if ENABLED(TJC_AVAILABLE)
                       tjc_page("nofilament");
                     #endif                    
@@ -7385,7 +7390,7 @@
           PoweroffContinue = true;
 
           //切换正在打印页面
-          RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
+          FUI::page_index(10);
           #if ENABLED(TJC_AVAILABLE) 
             tjc_page("printpause");
 
@@ -7621,39 +7626,39 @@
         }
         else if(recdat.data[0] == 2)
         {
-          RTS_SndData(ExchangePageBase + 3, ExchangepageAddr);
+          FUI::page_index(3);
         }
         else if(recdat.data[0] == 3)
         {
-          RTS_SndData(ExchangePageBase + 2, ExchangepageAddr);
+          FUI::page_index(2);
         }
         else if(recdat.data[0] == 4)
         {
-          RTS_SndData(ExchangePageBase + 4, ExchangepageAddr);
+          FUI::page_index(4);
         }
         else if(recdat.data[0] == 5)
         {
-          RTS_SndData(ExchangePageBase + 3, ExchangepageAddr);
+          FUI::page_index(3);
         }
         else if(recdat.data[0] == 6)
         {
-          RTS_SndData(ExchangePageBase + 5, ExchangepageAddr);
+          FUI::page_index(5);
         }
         else if(recdat.data[0] == 7)
         {
-          RTS_SndData(ExchangePageBase + 4, ExchangepageAddr);
+          FUI::page_index(4);
         }
         else if(recdat.data[0] == 8)
         {
-          RTS_SndData(ExchangePageBase + 6, ExchangepageAddr);
+          FUI::page_index(6);
         }
         else if(recdat.data[0] == 9)
         {
-          RTS_SndData(ExchangePageBase + 5, ExchangepageAddr);
+          FUI::page_index(5);
         }
         else if(recdat.data[0] == 10)
         {
-          //RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+          //FUI::page_index(1);
         }
         else if(recdat.data[0] == 0x0A)
         {
@@ -7753,7 +7758,7 @@
             #if ENABLED(EEPROM_SETTINGS)
               settings.save();
             #endif
-            //srtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
+            //sFUI::page_index(1);
           }
         #endif
       }
@@ -7764,7 +7769,7 @@
         if(recdat.data[0] == 0xF1)
         {
           //queue.enqueue_now_P(PSTR("M502"));
-          rtscheck.RTS_SndData(ExchangePageBase + 21, ExchangepageAddr);
+          FUI::page_index(21);
           #if ENABLED(EEPROM_SETTINGS)
             settings.init_eeprom();
             delay(500);
@@ -7789,7 +7794,7 @@
           #if ENABLED(EEPROM_SETTINGS)
             settings.save();
           #endif
-          rtscheck.RTS_SndData(ExchangePageBase + 35, ExchangepageAddr);
+          FUI::page_index(35);
         }
       }
       break;

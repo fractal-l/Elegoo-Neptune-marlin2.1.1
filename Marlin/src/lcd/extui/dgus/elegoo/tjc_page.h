@@ -22,20 +22,22 @@
 
 #if ENABLED(TJC_AVAILABLE)
 
+#include "fractalui.h"
+
   /**
-   * tjc_page("name") sends a TJC/DGUS-II page-change command over
-   * LCD_SERIAL_2: "page name" followed by the 0xFF 0xFF 0xFF terminator.
+   * tjc_page("name") switches the TJC screen to a page by name.
    *
-   * Replaces the repeated two-line pattern:
-   *   LCD_SERIAL_2.printf("page name");
-   *   LCD_SERIAL_2.printf("\xff\xff\xff");
-   *
-   * Include after inc/MarlinConfig.h (and the HAL) so LCD_SERIAL_2
-   * and FORCE_INLINE are defined.
+   * With FractalUI enabled the switch is routed through FUI::goto_name()
+   * so the page is immediately covered with the dark overlay UI and kept
+   * in sync with the firmware-side page state.
    */
   FORCE_INLINE void tjc_page(const char * const page) {
-    LCD_SERIAL_2.printf("page %s", page);
-    LCD_SERIAL_2.printf("\xff\xff\xff");
+    #if ENABLED(RTS_AVAILABLE)
+      FUI::goto_name(page);
+    #else
+      LCD_SERIAL_2.printf("page %s", page);
+      LCD_SERIAL_2.printf("\xff\xff\xff");
+    #endif
   }
 
 #endif

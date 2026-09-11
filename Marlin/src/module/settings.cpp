@@ -36,7 +36,7 @@
  */
 
 // Change EEPROM version if the structure changes
-#define EEPROM_VERSION "V90"
+#define EEPROM_VERSION "V91"
 #define EEPROM_OFFSET 100
 
 // Check the integrity of data offsets.
@@ -1799,6 +1799,12 @@ void MarlinSettings::postprocess() {
 
       EEPROM_WRITE(probe_extrusion_temp);
       EEPROM_WRITE(probe_bed_temp);
+
+      // FractalUI usage statistics
+      extern uint32_t fui_eeprom_prints, fui_eeprom_seconds, fui_eeprom_filament_mm;
+      EEPROM_WRITE(fui_eeprom_prints);
+      EEPROM_WRITE(fui_eeprom_seconds);
+      EEPROM_WRITE(fui_eeprom_filament_mm);
     #endif
 
     //
@@ -2930,6 +2936,12 @@ void MarlinSettings::postprocess() {
 
         EEPROM_READ(probe_extrusion_temp);
         EEPROM_READ(probe_bed_temp);
+
+        // FractalUI usage statistics
+        extern uint32_t fui_eeprom_prints, fui_eeprom_seconds, fui_eeprom_filament_mm;
+        EEPROM_READ(fui_eeprom_prints);
+        EEPROM_READ(fui_eeprom_seconds);
+        EEPROM_READ(fui_eeprom_filament_mm);
       #endif
 
       //

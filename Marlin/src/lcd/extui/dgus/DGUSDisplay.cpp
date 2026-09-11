@@ -45,6 +45,7 @@
 #include "DGUSDisplayDef.h"
 
 #include "../../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
+#include "../../../lcd/extui/dgus/elegoo/fractalui.h"
 
 DGUSDisplay dgus;
 
@@ -80,6 +81,7 @@ void DGUSDisplay::initDisplay() {
   #if ENABLED(RTS_AVAILABLE)
     LCD_SERIAL_2.begin(LCD_BAUDRATE);
     rtscheck.RTS_Init();
+    FUI::init();   // FractalUI: sendme + page-index probe
   #endif
 }
 
@@ -243,6 +245,20 @@ void DGUSDisplay::processRx() {
       {
         receivedbyte = LCD_SERIAL_2.read();
         //DEBUG_ECHOPGM("< ",x);
+        #if ENABLED(RTS_AVAILABLE)
+          // FractalUI: `sendme` page-enter events: 0x66 <idx> FF FF FF
+          static uint8_t page_evt_i = 0, page_evt_b[4];
+          if (page_evt_i) {
+            page_evt_b[page_evt_i - 1] = receivedbyte;
+            if (++page_evt_i > 4) {
+              page_evt_i = 0;
+              if (page_evt_b[1] == 0xFF && page_evt_b[2] == 0xFF && page_evt_b[3] == 0xFF)
+                FUI::on_page_index(page_evt_b[0]);
+            }
+            break;
+          }
+          if (receivedbyte == 0x66) { page_evt_i = 1; break; }
+        #endif
         if (DGUS_HEADER1 == receivedbyte) rx_datagram_state = DGUS_HEADER1_SEEN;
       }
       break;
@@ -392,6 +408,7 @@ void DGUSDisplay::loop() {
   processRx();
   #if ENABLED(RTS_AVAILABLE)
     RTSUpdate();
+    FUI::tick();   // FractalUI: rate-limited live refresh
   #endif
 }
 

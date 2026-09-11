@@ -277,6 +277,8 @@
 
   extern RTSSHOW rtscheck;
 
+  extern CRec CardRecbuf;
+
   enum PROC_COM
   {
     MainPageKey = 0,
