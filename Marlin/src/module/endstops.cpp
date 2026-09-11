@@ -27,6 +27,8 @@
 #include "endstops.h"
 #include "stepper.h"
 
+#include "../sd/cardreader.h"
+
 #if ANY(HAS_STATUS_MESSAGE, VALIDATE_HOMING_ENDSTOPS)
   #include "../lcd/marlinui.h"
 #endif
@@ -317,11 +319,30 @@ void Endstops::not_homing() {
 #if ENABLED(VALIDATE_HOMING_ENDSTOPS)
   // If the last move failed to trigger an endstop, call kill
   void Endstops::validate_homing_move() {
-    if (trigger_state())
-      hit_on_purpose();
+    if (trigger_state()) hit_on_purpose();
     else {
-      TERN_(SOVOL_SV06_RTS, rts.gotoPageBeep(ID_KillHome_L, ID_KillHome_D));
-      kill(GET_TEXT_F(MSG_KILL_HOMING_FAILED));
+
+      // A failed homing move leaves the axis position unknown.
+      // If a print job is active, NEVER auto-continue: stay in MF_STOPPED
+      // and require M999 to resume, otherwise subsequent print moves run
+      // without a known origin (nozzle crash risk).
+      // For a user-initiated home (from the menu), keep the Elegoo
+      // auto-recover behavior so the error page remains recoverable.
+      const bool job_active = printJobOngoing() || IS_SD_PRINTING();
+      stop();
+      if (!job_active) {
+        safe_delay(5000);   // watchdog-safe wait (was a bare delay)
+        marlin_state = MF_RUNNING;
+        ui.reset_alert_level();
+      }
+
+      #if ENABLED(RTS_AVAILABLE)
+        #if ENABLED(TJC_AVAILABLE)
+          tjc_page("err_homefail"); /* err_homefail */
+        #endif
+      #endif
+      return;
+
     }
   }
 #endif

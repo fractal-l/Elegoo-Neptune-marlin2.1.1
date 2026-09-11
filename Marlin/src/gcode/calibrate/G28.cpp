@@ -70,6 +70,10 @@
   #include "../../feature/spindle_laser.h"
 #endif
 
+#if ENABLED(RTS_AVAILABLE)
+  #include "../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
+#endif
+
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../core/debug_out.h"
 
@@ -227,6 +231,9 @@ void GcodeSuite::G28() {
   DEBUG_SECTION(log_G28, "G28", DEBUGGING(LEVELING));
   if (DEBUGGING(LEVELING)) log_machine_info();
 
+  #if ENABLED(RTS_AVAILABLE)
+    Home_stop_flag = true;
+  #endif
   #if ENABLED(MARLIN_DEV_MODE)
     if (parser.seen_test('S')) {
       LOOP_NUM_AXES(a) set_axis_is_at_home((AxisEnum)a);
@@ -580,6 +587,11 @@ void GcodeSuite::G28() {
   TERN_(SOVOL_SV06_RTS, RTS_MoveAxisHoming());
   TERN_(DWIN_CREALITY_LCD, dwinHomingDone());
   TERN_(EXTENSIBLE_UI, ExtUI::onHomingDone());
+
+  #if ENABLED(RTS_AVAILABLE)
+    RTS_MoveAxisHoming();
+    Home_stop_flag = false;
+  #endif
 
   report_current_position();
 

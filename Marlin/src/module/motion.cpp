@@ -31,7 +31,9 @@
 #include "temperature.h"
 #include "../gcode/gcode.h"
 #include "../lcd/marlinui.h"
+#include "../sd/cardreader.h"    // for IS_SD_PRINTING (homing failure gating)
 #include "../inc/MarlinConfig.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if IS_SCARA
   #include "../libs/buzzer.h"
@@ -2566,7 +2568,26 @@ void prepare_line_to_destination() {
 
         if (TEST(endstops.state(), es)) {
           SERIAL_ECHO_MSG("Bad ", C(AXIS_CHAR(axis)), " Endstop?");
-          kill(GET_TEXT_F(MSG_KILL_HOMING_FAILED));
+
+          // Endstop already triggered before the move: position is unknown.
+          // If a print job is active, stay in MF_STOPPED (require M999)
+          // instead of auto-continuing into print moves with no origin.
+          // Menu-initiated homes keep the Elegoo auto-recover behavior.
+          const bool job_active = printJobOngoing() || IS_SD_PRINTING();
+          stop();
+          if (!job_active) {
+            safe_delay(5000);   // watchdog-safe wait (was a bare delay)
+            marlin_state = MF_RUNNING;
+            ui.reset_alert_level();
+          }
+
+          #if ENABLED(RTS_AVAILABLE)
+            #if ENABLED(TJC_AVAILABLE)
+              tjc_page("err_homefail"); /* err_homefail */
+            #endif
+          #endif
+          return;
+
         }
 
       #endif // DETECT_BROKEN_ENDSTOP

@@ -28,6 +28,7 @@
 //#define IGNORE_THERMOCOUPLE_ERRORS
 
 #include "../MarlinCore.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 #include "../HAL/shared/Delay.h"
 #include "../lcd/marlinui.h"
 #include "../gcode/gcode.h"
@@ -70,6 +71,10 @@
 
 #if LASER_SAFETY_TIMEOUT_MS > 0
   #include "../feature/spindle_laser.h"
+#endif
+
+#if ENABLED(RTS_AVAILABLE)
+  #include "../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
 #endif
 
 #ifndef TEMP_SENSOR_0
@@ -874,7 +879,8 @@ void Temperature::factory_reset() {
 
     SERIAL_ECHOPGM(STR_PID_AUTOTUNE); SERIAL_ECHOLNPGM(STR_PID_AUTOTUNE_START);
 
-    disable_all_heaters();
+    //disable_all_heaters();
+    disable_all_heaters();   // Re-enabled: never autotune with another heater live (stock Marlin behavior)
     TERN_(AUTO_POWER_CONTROL, powerManager.power_on());
 
     long bias = GHV(MAX_CHAMBER_POWER, MAX_BED_POWER, PID_MAX) >> 1, d = bias;
@@ -984,11 +990,13 @@ void Temperature::factory_reset() {
               }
               else if (ELAPSED(ms, temp_change_ms)) {                 // Watch timer expired
                 TERN_(SOVOL_SV06_RTS, rts.gotoPageBeep(ID_KillHeat_L, ID_KillHeat_D));
+                tjc_page("err_heatfail");
                 _TEMP_ERROR(heater_id, FPSTR(str_t_heating_failed), MSG_ERR_HEATING_FAILED, current_temp);
               }
             }
             else if (current_temp < target - (MAX_OVERSHOOT_PID_AUTOTUNE)) { // Heated, then temperature fell too far?
               TERN_(SOVOL_SV06_RTS, rts.gotoPageBeep(ID_KillRunaway_L, ID_KillRunaway_D));
+              tjc_page("err_heatfail");
               _TEMP_ERROR(heater_id, FPSTR(str_t_thermal_runaway), MSG_ERR_THERMAL_RUNAWAY, current_temp);
             }
           }
@@ -1721,6 +1729,14 @@ void Temperature::maxtemp_error(const heater_id_t heater_id OPTARG(ERR_INCLUDE_T
     TERN_(DWIN_CREALITY_LCD, dwinPopupTemperature(1));
     TERN_(EXTENSIBLE_UI, ExtUI::onMaxTempError(heater_id));
   #endif
+  if(heater_id==H_E0)
+  {
+    tjc_page("err_nozzleover");
+  }
+  else if(heater_id==H_BED)
+  {
+    tjc_page("err_bedover");
+  }
   _TEMP_ERROR(heater_id, F(STR_T_MAXTEMP), MSG_ERR_MAXTEMP, deg);
 }
 
@@ -1737,6 +1753,14 @@ void Temperature::mintemp_error(const heater_id_t heater_id OPTARG(ERR_INCLUDE_T
     TERN_(DWIN_CREALITY_LCD, dwinPopupTemperature(0));
     TERN_(EXTENSIBLE_UI, ExtUI::onMinTempError(heater_id));
   #endif
+  if(heater_id==H_E0)
+  {
+    tjc_page("err_nozzleunde");
+  }
+  else if(heater_id==H_BED)
+  {
+    tjc_page("err_bedunder");
+  }
   _TEMP_ERROR(heater_id, F(STR_T_MINTEMP), MSG_ERR_MINTEMP, deg);
 }
 
@@ -1991,6 +2015,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id OPTARG(ERR_INCLUDE_T
             TERN_(SOVOL_SV06_RTS, rts.gotoPageBeep(ID_KillHeat_L, ID_KillHeat_D));
             TERN_(DWIN_CREALITY_LCD, dwinPopupTemperature(0));
             TERN_(EXTENSIBLE_UI, ExtUI::onHeatingError(e));
+            tjc_page("err_nozzleheat");
             _TEMP_ERROR(e, FPSTR(str_t_heating_failed), MSG_ERR_HEATING_FAILED, temp);
           }
         }
@@ -2029,6 +2054,7 @@ void Temperature::mintemp_error(const heater_id_t heater_id OPTARG(ERR_INCLUDE_T
           start_watching_bed();                 // If temp reached, turn off elapsed check
         else {
           TERN_(SOVOL_SV06_RTS, rts.gotoPageBeep(ID_KillHeat_L, ID_KillHeat_D));
+          tjc_page("err_bedheat");
           TERN_(DWIN_CREALITY_LCD, dwinPopupTemperature(0));
           TERN_(EXTENSIBLE_UI, ExtUI::onHeatingError(H_BED));
           _TEMP_ERROR(H_BED, FPSTR(str_t_heating_failed), MSG_ERR_HEATING_FAILED, deg);
@@ -3532,6 +3558,7 @@ void Temperature::init() {
         TERN_(SOVOL_SV06_RTS, rts.gotoPageBeep(ID_KillRunaway_L, ID_KillRunaway_D));
         TERN_(DWIN_CREALITY_LCD, dwinPopupTemperature(0));
         TERN_(EXTENSIBLE_UI, ExtUI::onHeatingError(heater_id));
+        tjc_page("err_heatfail");
         _TEMP_ERROR(heater_id, FPSTR(str_t_thermal_runaway), MSG_ERR_THERMAL_RUNAWAY, current);
         break;
 
@@ -4878,6 +4905,26 @@ void Temperature::isr() {
           ui.reset_status();
         #endif
         TERN_(PRINTER_EVENT_LEDS, printerEventLEDs.onHeatingDone());
+
+        #if ENABLED(RTS_AVAILABLE)
+          if((printJobOngoing() && IS_SD_PRINTING()) || (printJobOngoing() && PoweroffContinue) )
+          //if(printJobOngoing())
+          {
+            rtscheck.RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
+            #if ENABLED(TJC_AVAILABLE)
+              //全局变量
+              restFlag1 = 0;
+              restFlag2 = 1;
+              LCD_SERIAL_2.printf("restFlag1=0");
+              LCD_SERIAL_2.printf("\xff\xff\xff");
+              LCD_SERIAL_2.printf("restFlag2=1");
+              LCD_SERIAL_2.printf("\xff\xff\xff");
+
+              tjc_page("printpause");
+            #endif 
+          }
+        #endif
+
         return true;
       }
 

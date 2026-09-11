@@ -36,6 +36,7 @@ GCodeQueue queue;
 #include "../module/temperature.h"
 #include "../MarlinCore.h"
 #include "../core/bug_on.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if ENABLED(BINARY_FILE_TRANSFER)
   #include "../feature/binary_stream.h"
@@ -47,6 +48,10 @@ GCodeQueue queue;
 
 #if ENABLED(GCODE_REPEAT_MARKERS)
   #include "../feature/repeat.h"
+#endif
+
+#if ENABLED(RTS_AVAILABLE)
+  #include "../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
 #endif
 
 // Frequently used G-code strings
@@ -447,6 +452,10 @@ void GCodeQueue::get_serial_commands() {
       // Ok, we have some data to process, let's make progress here
       hadData = true;
 
+      #if ENABLED(RTS_AVAILABLE)
+        Move_finish_flag = true;
+      #endif
+
       const int c = read_serial(p);
       if (c < 0) {
         // This should never happen, let's log it
@@ -576,7 +585,12 @@ void GCodeQueue::get_serial_commands() {
     while (!ring_buffer.full() && !card.eof()) {
       const int16_t n = card.get();
       const bool card_eof = card.eof();
-      if (n < 0 && !card_eof) { SERIAL_ERROR_MSG(STR_SD_ERR_READ); continue; }
+      if (n < 0 && !card_eof) {
+        #if ENABLED(TJC_AVAILABLE)  
+          tjc_page("err_sdread");
+        #endif
+        SERIAL_ERROR_MSG(STR_SD_ERR_READ); continue; 
+      }
 
       CommandLine &command = ring_buffer.commands[ring_buffer.index_w];
       const char sd_char = (char)n;

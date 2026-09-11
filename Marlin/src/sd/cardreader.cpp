@@ -21,6 +21,7 @@
  */
 
 #include "../inc/MarlinConfig.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 /**
  * cardreader.cpp - SD card / USB flash drive file handling interface
@@ -971,7 +972,12 @@ void CardReader::write_command(char * const buf) {
   end[3] = '\0';
   myfile.write(begin);
 
-  if (myfile.writeError) SERIAL_ERROR_MSG(STR_SD_ERR_WRITE_TO_FILE);
+  if (myfile.writeError) {
+    #if ENABLED(TJC_AVAILABLE)
+      tjc_page("err_sdwrite");
+    #endif
+    SERIAL_ERROR_MSG(STR_SD_ERR_WRITE_TO_FILE);
+  }
 }
 
 #if DISABLED(NO_SD_AUTOSTART)

@@ -269,6 +269,10 @@
   #include "feature/rs485.h"
 #endif
 
+#if ENABLED(RTS_AVAILABLE)
+  #include "lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
+#endif
+
 #if !HAS_MEDIA
   CardReader card; // Stub instance with "no media" methods
 #endif
@@ -289,14 +293,19 @@ bool wait_for_heatup = false;
   bool wait_for_user; // = false
 
   void wait_for_user_response(millis_t ms/*=0*/, const bool no_sleep/*=false*/) {
-    UNUSED(no_sleep);
-    KEEPALIVE_STATE(PAUSED_FOR_USER);
-    wait_for_user = true;
-    if (ms) ms += millis(); // expire time
-    while (wait_for_user && !(ms && ELAPSED(millis(), ms)))
-      idle(TERN_(ADVANCED_PAUSE_FEATURE, no_sleep));
-    wait_for_user = false;
-    while (ui.button_pressed()) safe_delay(50);
+    
+    #if ENABLED(RTS_AVAILABLE)
+      wait_for_user = false;
+    #else
+      UNUSED(no_sleep);
+      KEEPALIVE_STATE(PAUSED_FOR_USER);
+      wait_for_user = true;
+      if (ms) ms += millis(); // expire time
+      while (wait_for_user && !(ms && ELAPSED(millis(), ms)))
+        idle(TERN_(ADVANCED_PAUSE_FEATURE, no_sleep));
+      wait_for_user = false;
+      while (ui.button_pressed()) safe_delay(50);
+    #endif
   }
 
 #endif
@@ -387,11 +396,35 @@ void startOrResumeJob() {
 
     TERN_(POWER_LOSS_RECOVERY, recovery.purge());
 
-    #ifdef EVENT_GCODE_SD_ABORT
-      queue.inject(F(EVENT_GCODE_SD_ABORT));
+    #if ENABLED(RTS_AVAILABLE)
+      if(abortSD_flag)
+      {
+        do_blocking_move_to_z(current_position.z + 5, 100);
+        #ifdef EVENT_GCODE_SD_ABORT_2
+          queue.inject(F(EVENT_GCODE_SD_ABORT_2));
+        #endif
+        abortSD_flag = false;
+      }
+      else
+      {
+        #ifdef EVENT_GCODE_SD_ABORT
+          queue.inject(F(EVENT_GCODE_SD_ABORT));
+        #endif
+      }
+      //planner.synchronize();//9999----停止打印后保存
+      queue.enqueue_now_P(PSTR("M900 K0"));
+      // M500 removed: it wrote the whole EEPROM on every stopped print
+      // (flash wear + a multi-second stall with the fork's 20ms EEPROM
+      // delays). M900 K0 is session-only; defaults already ship K=0.
+      queue.enqueue_now_P(PSTR("M84"));
+      //planner.synchronize();//9999----清缓存
+      
+      TERN_(PASSWORD_AFTER_SD_PRINT_ABORT, password.lock_machine());
+    #else
+      #ifdef EVENT_GCODE_SD_ABORT
+        queue.inject(F(EVENT_GCODE_SD_ABORT));
+      #endif
     #endif
-
-    TERN_(PASSWORD_AFTER_SD_PRINT_ABORT, password.lock_machine());
   }
 
   inline void finishSDPrinting() {
@@ -835,6 +868,8 @@ void idle(const bool no_stepper_sleep/*=false*/) {
   #else
     ui.update();
   #endif
+
+  TERN_(EXTENSIBLE_UI, ExtUI::onIdle());
 
   // Run i2c Position Encoders
   #if ENABLED(I2C_POSITION_ENCODERS)

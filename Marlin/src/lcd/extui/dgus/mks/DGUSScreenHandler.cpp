@@ -157,7 +157,7 @@ void DGUSScreenHandlerMKS::sendTMCSensValue(DGUS_VP_Variable &var) {
     uint16_t touched_nr = (int16_t)BE16_P(val_ptr) + top_file;
     if (touched_nr != 0x0F && touched_nr > filelist.count()) return;
     if (!filelist.seek(touched_nr) && touched_nr != 0x0F) return;
-
+    
     if (touched_nr == 0x0F) {
       if (filelist.isAtRootDir())
         gotoScreen(DGUS_SCREEN_MAIN);

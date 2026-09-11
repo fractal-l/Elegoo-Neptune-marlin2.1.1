@@ -1857,6 +1857,7 @@
                           || (defined(SERIAL_PORT_3)     && N == SERIAL_PORT_3) \
                           || (defined(MMU_SERIAL_PORT)   && N == MMU_SERIAL_PORT) \
                           || (defined(LCD_SERIAL_PORT)   && N == LCD_SERIAL_PORT) \
+                          || (defined(LCD_SERIAL_PORT_2) && N == LCD_SERIAL_PORT_2) \
                           || (defined(RS485_SERIAL_PORT) && N == RS485_SERIAL_PORT) )
 
 // Flag the named hardware serial ports in use
@@ -3279,18 +3280,49 @@
   #undef PROBING_MARGIN_FRONT
   #undef PROBING_MARGIN_BACK
 #elif PROBING_MARGIN
-  #ifndef PROBING_MARGIN_LEFT
-    #define PROBING_MARGIN_LEFT PROBING_MARGIN
+  #if NEPTUNE_3_PRO
+    #ifndef PROBING_MARGIN_LEFT
+      #define PROBING_MARGIN_LEFT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_RIGHT
+      #define PROBING_MARGIN_RIGHT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_FRONT
+      #define PROBING_MARGIN_FRONT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_BACK
+      #define PROBING_MARGIN_BACK  PROBING_MARGIN
+    #endif
+
+  #elif NEPTUNE_3_PLUS
+    #ifndef PROBING_MARGIN_LEFT
+      #define PROBING_MARGIN_LEFT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_RIGHT
+      #define PROBING_MARGIN_RIGHT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_FRONT
+      #define PROBING_MARGIN_FRONT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_BACK
+      #define PROBING_MARGIN_BACK  PROBING_MARGIN
+    #endif
+
+  #elif NEPTUNE_3_MAX
+    #ifndef PROBING_MARGIN_LEFT
+      #define PROBING_MARGIN_LEFT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_RIGHT
+      #define PROBING_MARGIN_RIGHT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_FRONT
+      #define PROBING_MARGIN_FRONT PROBING_MARGIN
+    #endif
+    #ifndef PROBING_MARGIN_BACK
+      #define PROBING_MARGIN_BACK  15
+    #endif
   #endif
-  #ifndef PROBING_MARGIN_RIGHT
-    #define PROBING_MARGIN_RIGHT PROBING_MARGIN
-  #endif
-  #ifndef PROBING_MARGIN_FRONT
-    #define PROBING_MARGIN_FRONT PROBING_MARGIN
-  #endif
-  #ifndef PROBING_MARGIN_BACK
-    #define PROBING_MARGIN_BACK PROBING_MARGIN
-  #endif
+
 #endif
 #ifndef PROBING_MARGIN_LEFT
   #define PROBING_MARGIN_LEFT 0

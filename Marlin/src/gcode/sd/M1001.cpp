@@ -21,6 +21,7 @@
  */
 
 #include "../../inc/MarlinConfig.h"
+#include "../../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if HAS_MEDIA
 
@@ -55,6 +56,10 @@
   #include "../../feature/host_actions.h"
 #endif
 
+#if ENABLED(RTS_AVAILABLE)
+  #include "../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
+#endif
+
 #ifndef PE_LEDS_COMPLETED_TIME
   #define PE_LEDS_COMPLETED_TIME (30*60)
 #endif
@@ -68,6 +73,8 @@
  */
 void GcodeSuite::M1001() {
   planner.synchronize();
+
+  //card.flag.abort_sd_printing = true;
 
   // SD Printing is finished when the queue reaches M1001
   card.flag.sdprinting = card.flag.sdprintdone = false;
@@ -111,6 +118,36 @@ void GcodeSuite::M1001() {
   #endif
 
   TERN_(EXTENSIBLE_UI, ExtUI::onPrintDone());
+
+  #if ENABLED(RTS_AVAILABLE)
+
+    abortSD_flag = false;
+
+    rtscheck.RTS_SndData(100, PRINT_PROCESS_VP);
+    delay(1);
+    rtscheck.RTS_SndData(100, PRINT_PROCESS_ICON_VP);
+    delay(1);
+    rtscheck.RTS_SndData(0, PRINT_SURPLUS_TIME_HOUR_VP);
+    delay(1);
+    rtscheck.RTS_SndData(0, PRINT_SURPLUS_TIME_MIN_VP);
+    delay(1);
+
+    rtscheck.RTS_SndData(ExchangePageBase + 9, ExchangepageAddr);
+    
+    #if ENABLED(TJC_AVAILABLE) 
+      //9999----07022339
+      LCD_SERIAL_2.printf("printpause.cp0.close()");
+      LCD_SERIAL_2.printf("\xff\xff\xff");
+
+      LCD_SERIAL_2.printf("printpause.cp0.aph=0");
+      LCD_SERIAL_2.printf("\xff\xff\xff");  
+
+      tjc_page("printfinish"); //9999----打印完成界面
+      //9999---queue.enqueue_now_P(PSTR("M84")); 
+
+    #endif
+    
+  #endif  
 
   // Re-select the last printed file in the UI
   TERN_(SD_REPRINT_LAST_SELECTED_FILE, ui.reselect_last_file());

@@ -417,6 +417,7 @@
 #define BOARD_VOXELAB_AQUILA          5069  // Voxelab Aquila V1.0.0/V1.0.1 (GD32F103RC / N32G455RE / STM32F103RE)
 #define BOARD_SPRINGER_CONTROLLER     5070  // ORCA 3D SPRINGER Modular Controller (STM32F103VC)
 
+
 //
 // ARM Cortex-M4F
 //
@@ -489,6 +490,7 @@
 #define BOARD_ZNP_ROBIN_NANO_V1_3     5258  // Elegoo Neptune 2 v1.3 board
 #define BOARD_MKS_NEPTUNE_X           5259  // Elegoo Neptune X
 #define BOARD_MKS_NEPTUNE_3           5260  // Elegoo Neptune 3
+#define BOARD_MKS_E3D_V2            5261  // MKS Robin E3D V2 (STM32F401RCT6) as used by Elegoo Neptune 3
 
 //
 // Other ARM Cortex-M4

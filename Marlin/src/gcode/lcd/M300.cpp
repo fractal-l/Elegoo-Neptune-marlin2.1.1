@@ -47,13 +47,23 @@ void GcodeSuite::M300() {
     }
   #endif
 
-  const uint16_t frequency = parser.ushortval('S', 260);
-  uint16_t duration = parser.ushortval('P', 1000);
+  #ifdef TJC_AVAILABLE
+    uint16_t duration = parser.ushortval('P', 1000);
+    char temp[16];
+    memset(temp,0,sizeof(temp));
+    sprintf(temp, "beep %d", duration);
+    LCD_SERIAL_2.printf(temp);
+    LCD_SERIAL_2.printf("\xff\xff\xff");
+  #else
+    const uint16_t frequency = parser.ushortval('S', 260);
+    uint16_t duration = parser.ushortval('P', 1000);
 
-  // Limits the tone duration to 0-5 seconds.
-  NOMORE(duration, 5000U);
+    // Limits the tone duration to 0-5 seconds.
+    NOMORE(duration, 5000U);
 
-  BUZZ(duration, frequency);
+    BUZZ(duration, frequency);
+  #endif
+
 }
 
 #endif // HAS_SOUND

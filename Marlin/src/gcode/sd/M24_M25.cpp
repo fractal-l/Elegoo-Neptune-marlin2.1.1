@@ -43,9 +43,17 @@
 
 #if DGUS_LCD_UI_MKS
   #include "../../lcd/extui/dgus/DGUSDisplayDef.h"
+  
 #endif
 
 #include "../../MarlinCore.h" // for startOrResumeJob
+
+#if ENABLED(TJC_AVAILABLE)
+  #include "../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
+  #if HAS_DISPLAY
+    #include "../../gcode/queue.h"
+  #endif
+#endif
 
 /**
  * M24: Start or Resume Media Print
@@ -87,6 +95,12 @@ void GcodeSuite::M24() {
     TERN_(HOST_PROMPT_SUPPORT, hostui.prompt_open(PROMPT_INFO, F("Resuming SD"), FPSTR(DISMISS_STR)));
   #endif
 
+  #if ENABLED(TJC_AVAILABLE)
+    restFlag1 = 0;
+    LCD_SERIAL_2.printf("restFlag1=0");
+    LCD_SERIAL_2.printf("\xff\xff\xff");
+  #endif
+
   ui.reset_status();
 }
 
@@ -105,27 +119,70 @@ void GcodeSuite::M25() {
 
   #else
 
-    // Set initial pause flag to prevent more commands from landing in the queue while we try to pause
-    if (card.isStillPrinting()) card.pauseSDPrint();
+    #if ENABLED(TJC_AVAILABLE)
 
-    #if ENABLED(POWER_LOSS_RECOVERY) && DISABLED(DGUS_LCD_UI_MKS)
-      if (recovery.enabled) recovery.save(true);
-    #endif
+      RTS_Pause_Api();
+      queue.inject(F("M10088"));
 
-    print_job_timer.pause();
+    #else
 
-    TERN_(DGUS_LCD_UI_MKS, MKS_pause_print_move());
+      // Set initial pause flag to prevent more commands from landing in the queue while we try to pause
+      if (card.isStillPrinting()) card.pauseSDPrint();
 
-    IF_DISABLED(DWIN_CREALITY_LCD, ui.reset_status());
-
-    #if ENABLED(HOST_ACTION_COMMANDS)
-      TERN_(HOST_PROMPT_SUPPORT, hostui.prompt_open(PROMPT_PAUSE_RESUME, F("Pause SD"), F("Resume")));
-      #ifdef ACTION_ON_PAUSE
-        hostui.pause();
+      #if ENABLED(POWER_LOSS_RECOVERY) && DISABLED(DGUS_LCD_UI_MKS)
+        if (recovery.enabled) recovery.save(true);
       #endif
+
+      print_job_timer.pause();
+
+      TERN_(DGUS_LCD_UI_MKS, MKS_pause_print_move());
+
+      IF_DISABLED(DWIN_CREALITY_LCD, ui.reset_status());
+
+      #if ENABLED(HOST_ACTION_COMMANDS)
+        TERN_(HOST_PROMPT_SUPPORT, hostui.prompt_open(PROMPT_PAUSE_RESUME, F("Pause SD"), F("Resume")));
+        #ifdef ACTION_ON_PAUSE
+          hostui.pause();
+        #endif
+      #endif
+
     #endif
 
   #endif
 }
+
+
+  #if ENABLED(TJC_AVAILABLE)
+    void GcodeSuite::M10088() {
+
+      #if ENABLED(PARK_HEAD_ON_PAUSE)
+
+        M125();
+
+      #else
+
+          // Set initial pause flag to prevent more commands from landing in the queue while we try to pause
+          if (card.isStillPrinting()) card.pauseSDPrint();
+
+          #if ENABLED(POWER_LOSS_RECOVERY) && DISABLED(DGUS_LCD_UI_MKS)
+            if (recovery.enabled) recovery.save(true);
+          #endif
+
+          print_job_timer.pause();
+
+          TERN_(DGUS_LCD_UI_MKS, MKS_pause_print_move());
+
+          IF_DISABLED(DWIN_CREALITY_LCD, ui.reset_status());
+
+          #if ENABLED(HOST_ACTION_COMMANDS)
+            TERN_(HOST_PROMPT_SUPPORT, hostui.prompt_open(PROMPT_PAUSE_RESUME, F("Pause SD"), F("Resume")));
+            #ifdef ACTION_ON_PAUSE
+              hostui.pause();
+            #endif
+          #endif
+
+      #endif
+    }
+  #endif
 
 #endif // HAS_MEDIA

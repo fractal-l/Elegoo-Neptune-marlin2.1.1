@@ -58,6 +58,10 @@
   #include "../../../feature/runout.h"
 #endif
 
+#if ENABLED(TJC_AVAILABLE)
+  #include "../../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
+#endif
+
 /**
  * M600: Pause for filament change
  *
@@ -82,6 +86,16 @@
  *
  *  Default values are used for omitted arguments.
  */
+void GcodeSuite::M600() {
+
+  #if ENABLED(TJC_AVAILABLE)
+    
+    RTS_M600_Flag = true;
+    LCD_SERIAL_2.printf("noFilamentPush.t0.txt=\"M600 Trigger\"");
+    LCD_SERIAL_2.printf("\xff\xff\xff");
+
+  #else
+
 void GcodeSuite::M600() {
 
   #if ENABLED(MIXING_EXTRUDER)
@@ -193,6 +207,8 @@ void GcodeSuite::M600() {
   #endif
 
   TERN_(MIXING_EXTRUDER, mixer.T(old_mixing_tool)); // Restore original mixing tool
+
+  #endif
 }
 
 #endif // ADVANCED_PAUSE_FEATURE

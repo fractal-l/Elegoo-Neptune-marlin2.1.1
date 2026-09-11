@@ -691,6 +691,9 @@ private:
     static void M28();
     static void M29();
     static void M30();
+    #if ENABLED(TJC_AVAILABLE)
+      static void M10088();
+    #endif
   #endif
 
   static void M31();
