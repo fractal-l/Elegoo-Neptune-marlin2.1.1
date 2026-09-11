@@ -28,6 +28,7 @@
 //#define IGNORE_THERMOCOUPLE_ERRORS
 
 #include "../MarlinCore.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 #include "../HAL/shared/Delay.h"
 #include "../lcd/marlinui.h"
 
@@ -774,8 +775,7 @@ volatile bool Temperature::raw_temps_ready = false;
               {
                 #if ENABLED(RTS_AVAILABLE)
                   #if ENABLED(TJC_AVAILABLE)
-                    LCD_SERIAL_2.printf("page err_heatfail"); 
-                    LCD_SERIAL_2.printf("\xff\xff\xff");
+                    tjc_page("err_heatfail");
                   #endif
                 #endif
                 _temp_error(heater_id, FPSTR(str_t_heating_failed), GET_TEXT_F(MSG_HEATING_FAILED_LCD));
@@ -785,8 +785,7 @@ volatile bool Temperature::raw_temps_ready = false;
             {
                 #if ENABLED(RTS_AVAILABLE)
                   #if ENABLED(TJC_AVAILABLE)
-                    LCD_SERIAL_2.printf("page err_heatfail"); 
-                    LCD_SERIAL_2.printf("\xff\xff\xff");
+                    tjc_page("err_heatfail");
                   #endif
                 #endif
               _temp_error(heater_id, FPSTR(str_t_thermal_runaway), GET_TEXT_F(MSG_THERMAL_RUNAWAY));
@@ -1330,13 +1329,11 @@ void Temperature::max_temp_error(const heater_id_t heater_id) {
   #endif
   if(heater_id==H_E0)
   {
-    LCD_SERIAL_2.printf("page err_nozzleover");
-    LCD_SERIAL_2.printf("\xff\xff\xff");     
+    tjc_page("err_nozzleover");
   }
   else if(heater_id==H_BED)
   {
-    LCD_SERIAL_2.printf("page err_bedover");
-    LCD_SERIAL_2.printf("\xff\xff\xff");       
+    tjc_page("err_bedover");
   }
   _temp_error(heater_id, F(STR_T_MAXTEMP), GET_TEXT_F(MSG_ERR_MAXTEMP));
 }
@@ -1347,13 +1344,11 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
   #endif
   if(heater_id==H_E0)
   {
-    LCD_SERIAL_2.printf("page err_nozzleunde");
-    LCD_SERIAL_2.printf("\xff\xff\xff");     
+    tjc_page("err_nozzleunde");
   }
   else if(heater_id==H_BED)
   {
-    LCD_SERIAL_2.printf("page err_bedunder");
-    LCD_SERIAL_2.printf("\xff\xff\xff");       
+    tjc_page("err_bedunder");
   }
   _temp_error(heater_id, F(STR_T_MINTEMP), GET_TEXT_F(MSG_ERR_MINTEMP));
 }
@@ -1591,8 +1586,7 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
             TERN_(HAS_DWIN_E3V2_BASIC, DWIN_Popup_Temperature(0));
             #if ENABLED(TJC_AVAILABLE)
               #if ENABLED(TJC_AVAILABLE)
-                LCD_SERIAL_2.printf("page err_nozzleheat"); 
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("err_nozzleheat");
               #endif
             #endif
             _temp_error((heater_id_t)e, FPSTR(str_t_heating_failed), GET_TEXT_F(MSG_HEATING_FAILED_LCD));
@@ -1621,8 +1615,7 @@ void Temperature::min_temp_error(const heater_id_t heater_id) {
         else {
           #if ENABLED(RTS_AVAILABLE)
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_bedheat"); 
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_bedheat");
             #endif
           #endif
           TERN_(HAS_DWIN_E3V2_BASIC, DWIN_Popup_Temperature(0));
@@ -2915,8 +2908,7 @@ void Temperature::init() {
         TERN_(HAS_DWIN_E3V2_BASIC, DWIN_Popup_Temperature(0));
         #if ENABLED(RTS_AVAILABLE)
           #if ENABLED(TJC_AVAILABLE)
-            LCD_SERIAL_2.printf("page err_heatfail"); 
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("err_heatfail");
           #endif
         #endif
         _temp_error(heater_id, FPSTR(str_t_thermal_runaway), GET_TEXT_F(MSG_THERMAL_RUNAWAY));
@@ -4122,8 +4114,7 @@ void Temperature::isr() {
               LCD_SERIAL_2.printf("restFlag2=1");
               LCD_SERIAL_2.printf("\xff\xff\xff");
 
-              LCD_SERIAL_2.printf("page printpause");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("printpause");
             #endif 
           }
         #endif

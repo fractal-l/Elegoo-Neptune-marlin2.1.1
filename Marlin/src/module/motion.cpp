@@ -33,6 +33,7 @@
 #include "../lcd/marlinui.h"
 #include "../sd/cardreader.h"    // for IS_SD_PRINTING (homing failure gating)
 #include "../inc/MarlinConfig.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if IS_SCARA
   #include "../libs/buzzer.h"
@@ -2077,8 +2078,7 @@ void prepare_line_to_destination() {
 
           #if ENABLED(RTS_AVAILABLE)
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_homefail"); /* err_homefail */
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_homefail"); /* err_homefail */
             #endif
           #endif
           return;

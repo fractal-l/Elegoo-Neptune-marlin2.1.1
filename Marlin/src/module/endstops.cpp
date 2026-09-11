@@ -30,6 +30,7 @@
 #include "../sd/cardreader.h"
 #include "temperature.h"
 #include "../lcd/marlinui.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #define DEBUG_OUT BOTH(USE_SENSORLESS, DEBUG_LEVELING_FEATURE)
 #include "../core/debug_out.h"
@@ -481,8 +482,7 @@ void Endstops::not_homing() {
 
       #if ENABLED(RTS_AVAILABLE)
         #if ENABLED(TJC_AVAILABLE)
-          LCD_SERIAL_2.printf("page err_homefail"); /* err_homefail */
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("err_homefail"); /* err_homefail */
         #endif
       #endif
       return;

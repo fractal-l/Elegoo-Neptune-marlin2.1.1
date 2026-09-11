@@ -21,6 +21,7 @@
  */
 
 #include "../inc/MarlinConfig.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if ENABLED(SDSUPPORT)
 
@@ -807,8 +808,7 @@ void CardReader::write_command(char * const buf) {
 
   if (file.writeError) {
     #if ENABLED(TJC_AVAILABLE)  
-      LCD_SERIAL_2.printf("page err_sdwrite");
-      LCD_SERIAL_2.printf("\xff\xff\xff");
+      tjc_page("err_sdwrite");
     #endif
     SERIAL_ERROR_MSG(STR_SD_ERR_WRITE_TO_FILE);
   }

@@ -25,6 +25,7 @@
  */
 
 #include "../inc/MarlinConfig.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if HAS_BED_PROBE
 
@@ -909,8 +910,7 @@ float Probe::probe_at_point(const_float_t rx, const_float_t ry, const ProbePtRai
   if (isnan(measured_z)) {
     stow();
     #if ENABLED(TJC_AVAILABLE)
-      LCD_SERIAL_2.printf("page err_probefail");
-      LCD_SERIAL_2.printf("\xff\xff\xff");
+      tjc_page("err_probefail");
       showcount = 0;
     #endif
     LCD_MESSAGE(MSG_LCD_PROBING_FAILED);

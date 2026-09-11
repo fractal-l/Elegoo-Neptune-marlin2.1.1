@@ -36,6 +36,7 @@ GCodeQueue queue;
 #include "../module/temperature.h"
 #include "../MarlinCore.h"
 #include "../core/bug_on.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if ENABLED(PRINTER_EVENT_LEDS)
   #include "../feature/leds/printer_event_leds.h"
@@ -571,8 +572,7 @@ void GCodeQueue::get_serial_commands() {
       const bool card_eof = card.eof();
       if (n < 0 && !card_eof) {
         #if ENABLED(TJC_AVAILABLE)  
-          LCD_SERIAL_2.printf("page err_sdread");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("err_sdread");
         #endif
         SERIAL_ERROR_MSG(STR_SD_ERR_READ); continue; 
       }

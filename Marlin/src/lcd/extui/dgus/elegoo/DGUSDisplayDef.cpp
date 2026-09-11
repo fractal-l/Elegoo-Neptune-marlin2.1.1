@@ -25,6 +25,7 @@
 #if ENABLED(RTS_AVAILABLE)
   #include "../../../../MarlinCore.h"
   #include "../../../../HAL/HAL.h"
+  #include "tjc_page.h"
   #include "../../../../core/macros.h"
   #include "../../../../inc/MarlinConfigPre.h"
   #include "../../../../module/temperature.h"
@@ -1234,8 +1235,7 @@
 
               #if ENABLED(TJC_AVAILABLE)
 
-                LCD_SERIAL_2.printf("page boot");
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("boot");
 
                 LCD_SERIAL_2.printf("com_star");
                 LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -1449,8 +1449,7 @@
                   card.closefile();
                 }
 
-                LCD_SERIAL_2.printf("page continueprint");
-                LCD_SERIAL_2.printf("\xff\xff\xff");                   
+                tjc_page("continueprint");
                                                                
               #endif 
               
@@ -1474,8 +1473,7 @@
 
             #if ENABLED(TJC_AVAILABLE)
 
-              LCD_SERIAL_2.printf("page boot");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("boot");
 
               #if ENABLED(NEPTUNE_3_PLUS)
                 LCD_SERIAL_2.printf("main.va0.val=2");  
@@ -1499,8 +1497,7 @@
                 TERN_(USE_WATCHDOG, hal.watchdog_refresh());
               }
 
-              LCD_SERIAL_2.printf("page main");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("main");
 
               //开照明灯
               OUT_WRITE(LED3_PIN, LOW);
@@ -1542,8 +1539,7 @@
           rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
 
           #if ENABLED(TJC_AVAILABLE)
-            LCD_SERIAL_2.printf("page boot");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("boot");
 
             #if ENABLED(NEPTUNE_3_PLUS)
               LCD_SERIAL_2.printf("main.va0.val=2");  
@@ -1567,8 +1563,7 @@
               TERN_(USE_WATCHDOG, hal.watchdog_refresh());
             }
 
-            LCD_SERIAL_2.printf("page main");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("main");
 
           #endif
 
@@ -1916,16 +1911,14 @@
             {
               rtscheck.RTS_SndData(ExchangePageBase + 16, ExchangepageAddr); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
-                LCD_SERIAL_2.printf("page adjusttemp");
-                LCD_SERIAL_2.printf("\xff\xff\xff");               
+                tjc_page("adjusttemp");
               #endif
             }
             else
             {
               rtscheck.RTS_SndData(ExchangePageBase + 31, ExchangepageAddr); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
-                LCD_SERIAL_2.printf("page prefilament");
-                LCD_SERIAL_2.printf("\xff\xff\xff");               
+                tjc_page("prefilament");
               #endif
             }
             rtscheck.RTS_SndData(10 * Filament0LOAD, HEAD0_FILAMENT_LOAD_DATA_VP);
@@ -1941,16 +1934,14 @@
             {
               rtscheck.RTS_SndData(ExchangePageBase + 16, ExchangepageAddr); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
-                LCD_SERIAL_2.printf("page adjusttemp");
-                LCD_SERIAL_2.printf("\xff\xff\xff");               
+                tjc_page("adjusttemp");
               #endif
             }
             else
             {
               rtscheck.RTS_SndData(ExchangePageBase + 31, ExchangepageAddr); //新UI处理
               #if ENABLED(TJC_AVAILABLE) 
-                LCD_SERIAL_2.printf("page prefilament");
-                LCD_SERIAL_2.printf("\xff\xff\xff");               
+                tjc_page("prefilament");
               #endif              
             }
             rtscheck.RTS_SndData(10 * Filament1LOAD, HEAD1_FILAMENT_LOAD_DATA_VP);
@@ -2155,8 +2146,7 @@
               {
                 rtscheck.RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
                 #if ENABLED(TJC_AVAILABLE) 
-                  LCD_SERIAL_2.printf("page wait");
-                  LCD_SERIAL_2.printf("\xff\xff\xff");               
+                  tjc_page("wait");
                 #endif
                 waitway = 5;
 
@@ -2182,8 +2172,7 @@
                 #if ENABLED(RTS_AVAILABLE)
                   rtscheck.RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
                   #if ENABLED(TJC_AVAILABLE) 
-                  LCD_SERIAL_2.printf("page wait");
-                  LCD_SERIAL_2.printf("\xff\xff\xff");               
+                  tjc_page("wait");
                   #endif
                 #endif
 
@@ -2246,8 +2235,7 @@
       {
         rtscheck.RTS_SndData(ExchangePageBase + 12, ExchangepageAddr);
         #if ENABLED(TJC_AVAILABLE)
-          LCD_SERIAL_2.printf("page printpause");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("printpause");
         #endif
         waitway = 0;
       }
@@ -2255,8 +2243,7 @@
       {
         rtscheck.RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
         #if ENABLED(TJC_AVAILABLE)
-          LCD_SERIAL_2.printf("page noFilamentPush");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("noFilamentPush");
         #endif
         waitway = 0;
       }
@@ -2268,8 +2255,7 @@
         #if ENABLED(RTS_AVAILABLE)
           rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE) 
-              LCD_SERIAL_2.printf("page main");
-              LCD_SERIAL_2.printf("\xff\xff\xff");            
+              tjc_page("main");
           #endif
         #endif
 
@@ -2314,20 +2300,17 @@
 
         #if ENABLED(NEPTUNE_3_PLUS)
           //LCD_SERIAL_2.printf("page leveldata_49");
-          LCD_SERIAL_2.printf("page aux49_data");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("aux49_data");
           LCD_SERIAL_2.printf("leveling_49.tm0.en=0");
           LCD_SERIAL_2.printf("\xff\xff\xff");
         #elif ENABLED(NEPTUNE_3_PRO)
-          LCD_SERIAL_2.printf("page leveldata_36");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("leveldata_36");
           LCD_SERIAL_2.printf("leveling_36.tm0.en=0");
           LCD_SERIAL_2.printf("\xff\xff\xff");        
         #elif ENABLED(NEPTUNE_3_MAX)
           //LCD_SERIAL_2.printf("page leveldata_64");
           //LCD_SERIAL_2.printf("page aux64_data");
-          LCD_SERIAL_2.printf("page aux63_data");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("aux63_data");
           //LCD_SERIAL_2.printf("leveling_64.tm0.en=0");
           LCD_SERIAL_2.printf("leveling_63.tm0.en=0");
           LCD_SERIAL_2.printf("\xff\xff\xff"); 
@@ -2336,8 +2319,7 @@
         LCD_SERIAL_2.printf("leveling.tm0.en=0");
         LCD_SERIAL_2.printf("\xff\xff\xff");
 
-        LCD_SERIAL_2.printf("page warn_zoffset");
-        LCD_SERIAL_2.printf("\xff\xff\xff");               
+        tjc_page("warn_zoffset");
       #endif
     }
   }
@@ -2350,8 +2332,7 @@
       #if ENABLED(RTS_AVAILABLE)
         rtscheck.RTS_SndData(ExchangePageBase + 29 + (AxisUnitMode - 1), ExchangepageAddr);
         #if ENABLED(TJC_AVAILABLE) 
-          LCD_SERIAL_2.printf("page premove");
-          LCD_SERIAL_2.printf("\xff\xff\xff");               
+          tjc_page("premove");
         #endif        
       #endif
     }
@@ -2371,20 +2352,17 @@
 
         #if ENABLED(NEPTUNE_3_PLUS)
           //LCD_SERIAL_2.printf("page leveldata_49");
-          LCD_SERIAL_2.printf("page aux49_data");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("aux49_data");
           LCD_SERIAL_2.printf("leveling_49.tm0.en=0");
           LCD_SERIAL_2.printf("\xff\xff\xff");  
         #elif ENABLED(NEPTUNE_3_PRO)
-          LCD_SERIAL_2.printf("page leveldata_36");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("leveldata_36");
           LCD_SERIAL_2.printf("leveling_36.tm0.en=0");
           LCD_SERIAL_2.printf("\xff\xff\xff");  
         #elif ENABLED(NEPTUNE_3_MAX)
           //LCD_SERIAL_2.printf("page leveldata_64");
           //LCD_SERIAL_2.printf("page aux64_data");
-          LCD_SERIAL_2.printf("page aux63_data");
-          LCD_SERIAL_2.printf("\xff\xff\xff");
+          tjc_page("aux63_data");
           //LCD_SERIAL_2.printf("leveling_64.tm0.en=0");
           LCD_SERIAL_2.printf("leveling_63.tm0.en=0");
           LCD_SERIAL_2.printf("\xff\xff\xff");  
@@ -2402,8 +2380,7 @@
       #if ENABLED(RTS_AVAILABLE)
         rtscheck.RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
         #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page main");
-            LCD_SERIAL_2.printf("\xff\xff\xff");            
+            tjc_page("main");
         #endif
       #endif
 
@@ -2545,8 +2522,7 @@
 
     rtscheck.RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
     #if ENABLED(TJC_AVAILABLE) 
-      LCD_SERIAL_2.printf("page wait");
-      LCD_SERIAL_2.printf("\xff\xff\xff");               
+      tjc_page("wait");
     #endif
 
     //reject to receive cmd
@@ -2616,8 +2592,7 @@
               }
               else 
               {
-                LCD_SERIAL_2.printf("page file1");
-                LCD_SERIAL_2.printf("\xff\xff\xff"); 
+                tjc_page("file1");
                 //9999----//If you are not in the printing state when entering the file list menu, remount the SD card to prevent it from loosening halfway and causing errors when printing documents later
                 if(!card.isPrinting()){
                     RTS_SDCardInit();
@@ -2635,8 +2610,7 @@
             RTS_SndData(ExchangePageBase + 47, ExchangepageAddr);
 
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page nosdcard");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("nosdcard");
             #endif
           }
         }
@@ -2785,24 +2759,21 @@
           {
             RTS_SndData(ExchangePageBase + 12, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page printpause");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("printpause");
             #endif
           }
           else if(printJobOngoing())
           {
             RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-                LCD_SERIAL_2.printf("page printpause");
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("printpause");
             #endif
           }
           else
           {
             RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-                LCD_SERIAL_2.printf("page printpause");
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("printpause");
             #endif
           }
         }
@@ -2847,8 +2818,7 @@
           RTS_SndData(2, ICON_ADJUST_PRINTING_TEMP_UNIT);       //默认单位调整为10
           RTS_SndData(ExchangePageBase + 16, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page adjusttemp");
-            LCD_SERIAL_2.printf("\xff\xff\xff");           
+            tjc_page("adjusttemp");
           #endif
         }
         else if(recdat.data[0] == 6)
@@ -2866,8 +2836,7 @@
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff");           
 
-            LCD_SERIAL_2.printf("page adjustspeed");
-            LCD_SERIAL_2.printf("\xff\xff\xff");            
+            tjc_page("adjustspeed");
           #endif
         }
         else if(recdat.data[0] == 7)
@@ -2888,8 +2857,7 @@
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff");   
 
-            LCD_SERIAL_2.printf("page adjustzoffset");
-            LCD_SERIAL_2.printf("\xff\xff\xff");              
+            tjc_page("adjustzoffset");
           #endif
         }
         else if(recdat.data[0] == 8)
@@ -2942,8 +2910,7 @@
           {
             RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE) 
-              LCD_SERIAL_2.printf("page wait");
-              LCD_SERIAL_2.printf("\xff\xff\xff");               
+              tjc_page("wait");
             #endif
 
             RTS_SndData(0, PRINT_TIME_HOUR_VP);
@@ -2960,24 +2927,21 @@
           {
             RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-                LCD_SERIAL_2.printf("page printpause");
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("printpause");
             #endif            
           }
           else if(sdcard_pause_check == false)
           {
             RTS_SndData(ExchangePageBase + 12, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-                LCD_SERIAL_2.printf("page printpause");
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("printpause");
             #endif  
           }
           else
           {
             RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-                LCD_SERIAL_2.printf("page printpause");
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("printpause");
             #endif  
           }
         }
@@ -2998,8 +2962,7 @@
 
           RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page wait");
-            LCD_SERIAL_2.printf("\xff\xff\xff");               
+            tjc_page("wait");
           #endif
 
           //reject to receive cmd
@@ -3023,8 +2986,7 @@
           if(IS_SD_PRINTING())
           {
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page pauseconfirm");
-              LCD_SERIAL_2.printf("\xff\xff\xff");  
+              tjc_page("pauseconfirm");
             #endif
           }
         }
@@ -3081,8 +3043,7 @@
 
           RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page wait");
-            LCD_SERIAL_2.printf("\xff\xff\xff");               
+            tjc_page("wait");
           #endif
 
           //char pause_str_Z[16];
@@ -3119,8 +3080,7 @@
 
           RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE)
-            LCD_SERIAL_2.printf("page printpause");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("printpause");
           #endif 
           }
           else if(recdat.data[0] == 2)
@@ -3157,8 +3117,7 @@
 
                     RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
                     #if ENABLED(TJC_AVAILABLE)
-                      LCD_SERIAL_2.printf("page printpause");
-                      LCD_SERIAL_2.printf("\xff\xff\xff");
+                      tjc_page("printpause");
                     #endif
 
                     if((0 == save_dual_x_carriage_mode) && (thermalManager.temp_hotend[0].target <= 175))
@@ -3189,8 +3148,7 @@
                     RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
 
                     #if ENABLED(TJC_AVAILABLE) 
-                      LCD_SERIAL_2.printf("page wait");
-                      LCD_SERIAL_2.printf("\xff\xff\xff");               
+                      tjc_page("wait");
                     #endif
 
                     //char pause_str_Z[16];
@@ -3219,8 +3177,7 @@
                     RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
 
                     #if ENABLED(TJC_AVAILABLE)
-                      LCD_SERIAL_2.printf("page printpause");
-                      LCD_SERIAL_2.printf("\xff\xff\xff");
+                      tjc_page("printpause");
                       //print_job_timer.start();//9999---
                     #endif 
                   }
@@ -3279,8 +3236,7 @@
             RTS_M600_Flag = false;
             RTS_SndData(ExchangePageBase + 8, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE) 
-              LCD_SERIAL_2.printf("page filamentresume");
-              LCD_SERIAL_2.printf("\xff\xff\xff");               
+              tjc_page("filamentresume");
             #endif
           }
           else if(PoweroffContinue == false)
@@ -3323,8 +3279,7 @@
               *c = tolower(*c);
 
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page printpause");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("printpause");
               restFlag2 = 0;
               LCD_SERIAL_2.printf("restFlag2=0");
               LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -3585,8 +3540,7 @@
           {
             RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE) 
-             LCD_SERIAL_2.printf("page wait");
-             LCD_SERIAL_2.printf("\xff\xff\xff");               
+             tjc_page("wait");
             #endif
             //char pause_str_Z[16];
             //char pause_str_E[16];
@@ -3610,8 +3564,7 @@
             sd_printing_autopause = false;
             RTS_SndData(ExchangePageBase + 11, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page printpause");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("printpause");
             print_job_timer.start();        //9999----
             #endif             
           }
@@ -4460,8 +4413,7 @@
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff"); 
 
-            LCD_SERIAL_2.printf("page tempsetvalue");
-            LCD_SERIAL_2.printf("\xff\xff\xff");                                     
+            tjc_page("tempsetvalue");
           #endif 
         }
         else if(recdat.data[0] == 14) //显示默认PETG温度
@@ -4484,8 +4436,7 @@
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff"); 
 
-            LCD_SERIAL_2.printf("page tempsetvalue");
-            LCD_SERIAL_2.printf("\xff\xff\xff");                                     
+            tjc_page("tempsetvalue");
           #endif 
         }
         else if(recdat.data[0] == 15) //显示默认ABS温度
@@ -4508,8 +4459,7 @@
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff"); 
 
-            LCD_SERIAL_2.printf("page tempsetvalue");
-            LCD_SERIAL_2.printf("\xff\xff\xff");                                     
+            tjc_page("tempsetvalue");
           #endif 
         }
         else if(recdat.data[0] == 16) //显示默认TPU温度
@@ -4532,8 +4482,7 @@
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff"); 
 
-            LCD_SERIAL_2.printf("page tempsetvalue");
-            LCD_SERIAL_2.printf("\xff\xff\xff");                                     
+            tjc_page("tempsetvalue");
           #endif 
         }
         else if(recdat.data[0] == 17) //默认调平温度
@@ -4556,8 +4505,7 @@
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff"); 
 
-            LCD_SERIAL_2.printf("page tempsetvalue");
-            LCD_SERIAL_2.printf("\xff\xff\xff");                                     
+            tjc_page("tempsetvalue");
           #endif
         }
 
@@ -5053,8 +5001,7 @@
           RTS_SndData(0, MOTOR_FREE_ICON_VP);
 
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page autohome");
-            LCD_SERIAL_2.printf("\xff\xff\xff");               
+            tjc_page("autohome");
           #endif
         }
         else if(recdat.data[0] == 5)
@@ -5091,8 +5038,7 @@
 
           #if ENABLED(TJC_AVAILABLE) 
           
-            LCD_SERIAL_2.printf("page autohome");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("autohome");
 
             //07021527-增加条件判断进入回原点失败界面后返回。
             // if (/* condition */)
@@ -5150,8 +5096,7 @@
           RTS_SndData(ExchangePageBase + 32, ExchangepageAddr);
 
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page autohome");
-            LCD_SERIAL_2.printf("\xff\xff\xff");               
+            tjc_page("autohome");
           #endif
         }
         else if (recdat.data[0] == 3)
@@ -5274,23 +5219,20 @@
           RTS_SndData(ExchangePageBase + 30, ExchangepageAddr);
 
           #if ENABLED(TJC_AVAILABLE)
-            LCD_SERIAL_2.printf("page pretemp");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("pretemp");
           #endif
 
           if(thermalManager.wholeDegHotend(0) < 0)
           {
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_nozzleunde");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_nozzleunde");
             #endif
             break;
           }
           else if(thermalManager.wholeDegBed() < 0)
           {
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_bedunder");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_bedunder");
             #endif
             break;
           }          
@@ -5301,8 +5243,7 @@
           RTS_SndData(ExchangePageBase + 31, ExchangepageAddr);
 
           #if ENABLED(TJC_AVAILABLE)
-            LCD_SERIAL_2.printf("page prefilament");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("prefilament");
 
             memset(temp,0,sizeof(temp));
             sprintf(temp, "prefilament.filamentlength.txt=\"%d\"", (int)Filament0LOAD);
@@ -5339,8 +5280,7 @@
                 LCD_SERIAL_2.printf("multiset.plrbutton.val=1");
                 LCD_SERIAL_2.printf("\xff\xff\xff"); 
               }              
-              LCD_SERIAL_2.printf("page multiset");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("multiset");
             #endif 
           #endif            
         }
@@ -5442,8 +5382,7 @@
             RTS_SndData(ExchangePageBase + 32, ExchangepageAddr);
 
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page autohome");
-            LCD_SERIAL_2.printf("\xff\xff\xff");               
+            tjc_page("autohome");
           #endif
           }
           else
@@ -6286,8 +6225,7 @@
           {
             RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE) 
-              LCD_SERIAL_2.printf("page warn1_filament");
-              LCD_SERIAL_2.printf("\xff\xff\xff");               
+              tjc_page("warn1_filament");
             #endif
             //222---
             //return;
@@ -6319,8 +6257,7 @@
                 RTS_SndData((int)ChangeFilament0Temp, CHANGE_FILAMENT0_TEMP_VP);
                 RTS_SndData(ExchangePageBase + 24, ExchangepageAddr);
                 #if ENABLED(TJC_AVAILABLE)
-                  LCD_SERIAL_2.printf("page warn2_filament");
-                  LCD_SERIAL_2.printf("\xff\xff\xff");
+                  tjc_page("warn2_filament");
                 #endif  
               }
               else
@@ -6338,8 +6275,7 @@
           {
             RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE) 
-              LCD_SERIAL_2.printf("page warn1_filament");
-              LCD_SERIAL_2.printf("\xff\xff\xff");               
+              tjc_page("warn1_filament");
             #endif
             //222---
             //return;
@@ -6370,8 +6306,7 @@
                 RTS_SndData((int)ChangeFilament0Temp, CHANGE_FILAMENT0_TEMP_VP);
                 RTS_SndData(ExchangePageBase + 24, ExchangepageAddr);
                 #if ENABLED(TJC_AVAILABLE)
-                  LCD_SERIAL_2.printf("page warn2_filament");
-                  LCD_SERIAL_2.printf("\xff\xff\xff");
+                  tjc_page("warn2_filament");
                 #endif 
                 //222---
                  //return; 
@@ -6472,8 +6407,7 @@
             RTS_SndData(ChangeFilament0Temp, HEAD0_SET_TEMP_VP);
             RTS_SndData(ExchangePageBase + 26, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page heatfilament");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("heatfilament");
             #endif 
             heatway = 1;
           }
@@ -6489,8 +6423,7 @@
             //RTS_SndData(ExchangePageBase + 23, ExchangepageAddr);
             RTS_SndData(ExchangePageBase + 31, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page prefilament");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("prefilament");
             #endif 
             heatway = 1;
           }
@@ -6506,8 +6439,7 @@
             RTS_SndData(ChangeFilament1Temp, HEAD1_SET_TEMP_VP);
             RTS_SndData(ExchangePageBase + 26, ExchangepageAddr);
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page heatfilament");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("heatfilament");
             #endif 
             heatway = 2;
           }
@@ -6529,8 +6461,7 @@
             RTS_SndData(ExchangePageBase + 40, ExchangepageAddr);
             
             #if ENABLED(TJC_AVAILABLE) 
-              LCD_SERIAL_2.printf("page wait");
-              LCD_SERIAL_2.printf("\xff\xff\xff");               
+              tjc_page("wait");
             #endif
 
             //reject to receive cmd
@@ -6552,8 +6483,7 @@
           if(!planner.has_blocks_queued())
           {
             #if ENABLED(TJC_AVAILABLE) 
-              LCD_SERIAL_2.printf("page main");
-              LCD_SERIAL_2.printf("\xff\xff\xff");           
+              tjc_page("main");
             #endif
           }
         }
@@ -6659,16 +6589,14 @@
                 {
                   RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
                   #if ENABLED(TJC_AVAILABLE)
-                      LCD_SERIAL_2.printf("page nofilament");
-                      LCD_SERIAL_2.printf("\xff\xff\xff");
+                      tjc_page("nofilament");
                   #endif      
                 }
                 else if((0 == READ(CHECKFILEMENT1_PIN)) && (active_extruder == 1))
                 {
                   RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
                   #if ENABLED(TJC_AVAILABLE)
-                      LCD_SERIAL_2.printf("page nofilament");
-                      LCD_SERIAL_2.printf("\xff\xff\xff");
+                      tjc_page("nofilament");
                   #endif 
                 }
               #else
@@ -6676,8 +6604,7 @@
                 {
                   RTS_SndData(ExchangePageBase + 20, ExchangepageAddr);
                   #if ENABLED(TJC_AVAILABLE)
-                      LCD_SERIAL_2.printf("page nofilament");
-                      LCD_SERIAL_2.printf("\xff\xff\xff");
+                      tjc_page("nofilament");
                   #endif 
                 }
               #endif
@@ -6733,8 +6660,7 @@
                 restFlag2 = 0;
                 LCD_SERIAL_2.printf("restFlag2=0");
                 LCD_SERIAL_2.printf("\xff\xff\xff");
-                LCD_SERIAL_2.printf("page printpause");
-                LCD_SERIAL_2.printf("\xff\xff\xff");
+                tjc_page("printpause");
                 pause_count_pos = 0;
               #endif
 
@@ -6769,8 +6695,7 @@
           #endif
           RTS_SndData(ExchangePageBase + 1, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page main");
-            LCD_SERIAL_2.printf("\xff\xff\xff");             
+            tjc_page("main");
           #endif
           RTS_SndData(0, PRINT_TIME_HOUR_VP);
           RTS_SndData(0, PRINT_TIME_MIN_VP);
@@ -6864,8 +6789,7 @@
           RTS_SndData(ExchangePageBase + 28, ExchangepageAddr);
 
           #if ENABLED(TJC_AVAILABLE)
-            LCD_SERIAL_2.printf("page askprint"); 
-            LCD_SERIAL_2.printf("\xff\xff\xff");  
+            tjc_page("askprint");
           #endif
         }
       }
@@ -6904,8 +6828,7 @@
             LCD_SERIAL_2.printf(temp); 
             LCD_SERIAL_2.printf("\xff\xff\xff");  
 
-            LCD_SERIAL_2.printf("page printcnfirm"); 
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("printcnfirm");
 
             // //openfile
             // card.openFileRead(filelist.shortFilename());
@@ -7066,16 +6989,14 @@
           if(thermalManager.wholeDegHotend(0) < 0)
           {
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_nozzleunde");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_nozzleunde");
             #endif
             break;
           }
           else if(thermalManager.wholeDegBed() < 0)
           {
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_bedunder");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_bedunder");
             #endif
             break;
           }  
@@ -7109,8 +7030,7 @@
                   {
                     RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
                     #if ENABLED(TJC_AVAILABLE)
-                      LCD_SERIAL_2.printf("page nofilament"); 
-                      LCD_SERIAL_2.printf("\xff\xff\xff");  
+                      tjc_page("nofilament");
                     #endif                    
                     sdcard_pause_check = false;
                     break;
@@ -7162,8 +7082,7 @@
           //切换正在打印页面
           RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page printpause");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("printpause");
 
             restFlag2 = 0;
             LCD_SERIAL_2.printf("restFlag2=0");
@@ -7326,16 +7245,14 @@
           if(thermalManager.wholeDegHotend(0) < 0)
           {
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_nozzleunde");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_nozzleunde");
             #endif
             break;
           }
           else if(thermalManager.wholeDegBed() < 0)
           {
             #if ENABLED(TJC_AVAILABLE)
-              LCD_SERIAL_2.printf("page err_bedunder");
-              LCD_SERIAL_2.printf("\xff\xff\xff");
+              tjc_page("err_bedunder");
             #endif
             break;
           }  
@@ -7412,8 +7329,7 @@
                   {
                     RTS_SndData(ExchangePageBase + 39, ExchangepageAddr);
                     #if ENABLED(TJC_AVAILABLE)
-                      LCD_SERIAL_2.printf("page nofilament"); 
-                      LCD_SERIAL_2.printf("\xff\xff\xff");  
+                      tjc_page("nofilament");
                     #endif                    
                     sdcard_pause_check = false;
                     break;
@@ -7471,8 +7387,7 @@
           //切换正在打印页面
           RTS_SndData(ExchangePageBase + 10, ExchangepageAddr);
           #if ENABLED(TJC_AVAILABLE) 
-            LCD_SERIAL_2.printf("page printpause");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("printpause");
 
             restFlag2 = 0;
             LCD_SERIAL_2.printf("restFlag2=0");
@@ -7742,8 +7657,7 @@
         }
         else if(recdat.data[0] == 0x0A)
         {
-          LCD_SERIAL_2.printf("page main");
-          LCD_SERIAL_2.printf("\xff\xff\xff");       
+          tjc_page("main");
         }
         else if(recdat.data[0] == 0x0B)
         {
@@ -8195,8 +8109,7 @@
           SdFile dir, root = card.getroot();
           if (dir.open(&root, MKSTestPath, O_RDONLY))
           {
-            LCD_SERIAL_2.printf("page hardwaretest");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
+            tjc_page("hardwaretest");
           }
         }                            
       }

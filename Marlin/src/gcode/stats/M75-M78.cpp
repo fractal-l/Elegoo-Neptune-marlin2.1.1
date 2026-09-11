@@ -24,6 +24,7 @@
 #include "../../gcode/queue.h"
 #include "../../module/printcounter.h"
 #include "../../lcd/marlinui.h"
+#include "../../lcd/extui/dgus/elegoo/tjc_page.h"
 #if ENABLED(HOST_PAUSE_M76)
   #include "../../feature/host_actions.h"
 #endif
@@ -47,8 +48,7 @@ void GcodeSuite::M75() {
     //DWIN_Print_Started(false);
     //if (!IS_SD_PRINTING()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
   #if ENABLED(TJC_AVAILABLE)
-    LCD_SERIAL_2.printf("page printpause"); 
-    LCD_SERIAL_2.printf("\xff\xff\xff");  
+    tjc_page("printpause");
     restFlag1 = 0;
     LCD_SERIAL_2.printf("restFlag1=0");  //9999----打印界面显示：1-恢复按钮 0-暂停按钮
     LCD_SERIAL_2.printf("\xff\xff\xff");
@@ -98,8 +98,7 @@ void GcodeSuite::M77() {
     //DWIN_Print_Started(false);
     //if (!IS_SD_PRINTING()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
 
-  LCD_SERIAL_2.printf("page main"); 
-  LCD_SERIAL_2.printf("\xff\xff\xff");  
+  tjc_page("main");
   
   #endif
 

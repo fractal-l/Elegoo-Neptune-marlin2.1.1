@@ -21,6 +21,7 @@
  */
 
 #include "../../inc/MarlinConfig.h"
+#include "../../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if ENABLED(SDSUPPORT)
 
@@ -140,8 +141,7 @@ void GcodeSuite::M1001() {
       LCD_SERIAL_2.printf("printpause.cp0.aph=0");
       LCD_SERIAL_2.printf("\xff\xff\xff");  
 
-      LCD_SERIAL_2.printf("page printfinish");//9999----打印完成界面
-      LCD_SERIAL_2.printf("\xff\xff\xff");
+      tjc_page("printfinish"); //9999----打印完成界面
       //9999---queue.enqueue_now_P(PSTR("M84")); 
 
     #endif
