@@ -662,6 +662,7 @@ volatile bool Temperature::raw_temps_ready = false;
     SERIAL_ECHOLNPGM(STR_PID_AUTOTUNE_START);
 
     //disable_all_heaters();
+    disable_all_heaters();   // Re-enabled: never autotune with another heater live (stock Marlin behavior)
     TERN_(AUTO_POWER_CONTROL, powerManager.power_on());
 
     long bias = GHV(MAX_CHAMBER_POWER, MAX_BED_POWER, PID_MAX) >> 1, d = bias;
