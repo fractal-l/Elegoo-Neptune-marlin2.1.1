@@ -2570,14 +2570,14 @@ void prepare_line_to_destination() {
           SERIAL_ECHO_MSG("Bad ", C(AXIS_CHAR(axis)), " Endstop?");
 
           // Endstop already triggered before the move: position is unknown.
-          // If a print job is active, stay in MF_STOPPED (require M999)
+          // If a print job is active, stay in MarlinState::MF_STOPPED (require M999)
           // instead of auto-continuing into print moves with no origin.
           // Menu-initiated homes keep the Elegoo auto-recover behavior.
-          const bool job_active = printJobOngoing() || IS_SD_PRINTING();
+          const bool job_active = printJobOngoing() || card.isPrinting();
           stop();
           if (!job_active) {
             safe_delay(5000);   // watchdog-safe wait (was a bare delay)
-            marlin_state = MF_RUNNING;
+            marlin_state = MarlinState::MF_RUNNING;
             ui.reset_alert_level();
           }
 

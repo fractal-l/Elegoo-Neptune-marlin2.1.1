@@ -279,7 +279,7 @@ void DGUSDisplay::processRx() {
         if (LCD_SERIAL_2.available() < rx_datagram_len) return;
         //SERIAL_ECHOLNPGM("dgus wait telegram\r\n");
 
-        Initialized = true; // We've talked to it, so we defined it as initialized.
+        initialized = true; // We've talked to it, so we defined it as initialized.
         uint8_t command = LCD_SERIAL_2.read();
 
         DEBUG_ECHOPGM("# ", command);

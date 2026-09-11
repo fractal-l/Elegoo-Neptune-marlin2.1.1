@@ -187,18 +187,12 @@ void PrintJobRecovery::save(const bool force/*=false*/, const float zraise/*=POW
     #define POWER_LOSS_MIN_Z_CHANGE 0.05  // Vase-mode-friendly out of the box
   #endif
 
-  //set_bed_leveling_enabled(false);
-
   // Did Z change since the last call?
-  #if ENABLED(RTS_AVAILABLE) 
-  //if(current_position.z > planner.z_fade_height)
-  #endif
-  {
-    if (force
-      #if DISABLED(SAVE_EACH_CMD_MODE)      // Always save state when enabled
-        #if SAVE_INFO_INTERVAL_MS > 0       // Save if interval is elapsed
-          || ELAPSED(ms, next_save_ms)
-        #endif
+  if (force
+    #if DISABLED(SAVE_EACH_CMD_MODE)      // Always save state when enabled
+      #if SAVE_INFO_INTERVAL_MS > 0       // Save if interval is elapsed
+        || ELAPSED(ms, next_save_ms)
+      #endif
       // Save if Z is above the last-saved position by some minimum height
       || current_position.z > info.current_position.z + POWER_LOSS_MIN_Z_CHANGE
     #endif
@@ -237,77 +231,42 @@ void PrintJobRecovery::save(const bool force/*=false*/, const float zraise/*=POW
       #else
         if (parser.volumetric_enabled) info.filament_size[0] = planner.filament_size[active_extruder];
       #endif
-    ) {
+    #endif
 
     #if HAS_HOTEND
       HOTEND_LOOP() info.target_temperature[e] = thermalManager.degTargetHotend(e);
     #endif
 
-      // Set Head and Foot to matching non-zero values
-      if (!++info.valid_head) ++info.valid_head; // non-zero in sequence
-      //if (!IS_SD_PRINTING()) info.valid_head = 0;
-      info.valid_foot = info.valid_head;
+    TERN_(HAS_HEATED_BED, info.target_temperature_bed = thermalManager.degTargetBed());
 
     TERN_(HAS_HEATED_CHAMBER, info.target_temperature_chamber = thermalManager.degTargetChamber());
 
     TERN_(HAS_FAN, COPY(info.fan_speed, thermalManager.fan_speed));
 
-      info.feedrate = uint16_t(MMS_TO_MMM(feedrate_mm_s));
-      info.zraise = zraise;
-      info.flag.raised = raised;                      // Was Z raised before power-off?
+    #if HAS_LEVELING
+      info.flag.leveling = planner.leveling_active;
+      info.fade = TERN0(ENABLE_LEVELING_FADE_HEIGHT, planner.z_fade_height);
+    #endif
 
-      TERN_(GCODE_REPEAT_MARKERS, info.stored_repeat = repeat);
-      TERN_(HAS_HOME_OFFSET, info.home_offset = home_offset);
-      TERN_(HAS_POSITION_SHIFT, info.position_shift = position_shift);
-      E_TERN_(info.active_extruder = active_extruder);
+    TERN_(GRADIENT_MIX, memcpy(&info.gradient, &mixer.gradient, sizeof(info.gradient)));
 
-      #if DISABLED(NO_VOLUMETRICS)
-        info.flag.volumetric_enabled = parser.volumetric_enabled;
-        #if HAS_MULTI_EXTRUDER
-          EXTRUDER_LOOP() info.filament_size[e] = planner.filament_size[e];
-        #else
-          if (parser.volumetric_enabled) info.filament_size[0] = planner.filament_size[active_extruder];
-        #endif
-      #endif
+    #if ENABLED(FWRETRACT)
+      COPY(info.retract, fwretract.current_retract);
+      info.retract_hop = fwretract.current_hop;
+    #endif
 
-      #if HAS_EXTRUDERS
-        HOTEND_LOOP() info.target_temperature[e] = thermalManager.degTargetHotend(e);
-      #endif
+    // Elapsed print job time
+    info.print_job_elapsed = print_job_timer.duration();
 
-      TERN_(HAS_HEATED_BED, info.target_temperature_bed = thermalManager.degTargetBed());
+    // Relative axis modes
+    info.axis_relative = gcode.axis_relative;
 
-      #if HAS_FAN
-        COPY(info.fan_speed, thermalManager.fan_speed);
-      #endif
+    // Misc. Marlin flags
+    info.flag.dryrun = !!(marlin_debug_flags & MARLIN_DEBUG_DRYRUN);
+    info.flag.allow_cold_extrusion = TERN0(PREVENT_COLD_EXTRUSION, thermalManager.allow_cold_extrude);
 
-      #if HAS_LEVELING
-        info.flag.leveling = planner.leveling_active;
-        info.fade = TERN0(ENABLE_LEVELING_FADE_HEIGHT, planner.z_fade_height);
-      #endif
-
-      TERN_(GRADIENT_MIX, memcpy(&info.gradient, &mixer.gradient, sizeof(info.gradient)));
-
-      #if ENABLED(FWRETRACT)
-        COPY(info.retract, fwretract.current_retract);
-        info.retract_hop = fwretract.current_hop;
-      #endif
-
-      // Elapsed print job time
-      info.print_job_elapsed = print_job_timer.duration();
-
-      // Relative axis modes
-      info.axis_relative = gcode.axis_relative;
-
-      // Misc. Marlin flags
-      info.flag.dryrun = !!(marlin_debug_flags & MARLIN_DEBUG_DRYRUN);
-      info.flag.allow_cold_extrusion = TERN0(PREVENT_COLD_EXTRUSION, thermalManager.allow_cold_extrude);
-
-      write();
-
-      //info.current_position.z = (current_position[Z_AXIS] + 0.2);
-    }
+    write();
   }
-  //set_bed_leveling_enabled(true);
 }
 
 #if PIN_EXISTS(POWER_LOSS)

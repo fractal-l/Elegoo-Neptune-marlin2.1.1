@@ -64,6 +64,7 @@
 #endif
 
 #if ENABLED(RTS_AVAILABLE)
+  #include "../../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
 #endif
 
 #if ABL_USES_GRID
@@ -465,7 +466,7 @@ G29_TYPE GcodeSuite::G29() {
         #endif
         #if ENABLED(RTS_AVAILABLE)
           if (!abl.dryrun) probe.preheat_for_probing(probe_extrusion_temp,
-            #if BOTH(DWIN_LCD_PROUI, HAS_HEATED_BED)
+            #if ALL(DWIN_LCD_PROUI, HAS_HEATED_BED)
               HMI_data.BedLevT
             #else
               probe_bed_temp

@@ -28,6 +28,7 @@
 #include "stepper.h"
 
 #include "../sd/cardreader.h"
+#include "../lcd/extui/dgus/elegoo/tjc_page.h"
 
 #if ANY(HAS_STATUS_MESSAGE, VALIDATE_HOMING_ENDSTOPS)
   #include "../lcd/marlinui.h"
@@ -323,16 +324,16 @@ void Endstops::not_homing() {
     else {
 
       // A failed homing move leaves the axis position unknown.
-      // If a print job is active, NEVER auto-continue: stay in MF_STOPPED
+      // If a print job is active, NEVER auto-continue: stay in MarlinState::MF_STOPPED
       // and require M999 to resume, otherwise subsequent print moves run
       // without a known origin (nozzle crash risk).
       // For a user-initiated home (from the menu), keep the Elegoo
       // auto-recover behavior so the error page remains recoverable.
-      const bool job_active = printJobOngoing() || IS_SD_PRINTING();
+      const bool job_active = printJobOngoing() || card.isPrinting();
       stop();
       if (!job_active) {
         safe_delay(5000);   // watchdog-safe wait (was a bare delay)
-        marlin_state = MF_RUNNING;
+        marlin_state = MarlinState::MF_RUNNING;
         ui.reset_alert_level();
       }
 

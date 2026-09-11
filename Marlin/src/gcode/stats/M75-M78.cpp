@@ -86,7 +86,7 @@ void GcodeSuite::M77() {
 
   #if ENABLED(TJC_AVAILABLE) 
     //DWIN_Print_Started(false);
-    //if (!IS_SD_PRINTING()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
+    //if (!card.isPrinting()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
 
   tjc_page("main");
   
