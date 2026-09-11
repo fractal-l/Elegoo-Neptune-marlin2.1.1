@@ -111,3 +111,68 @@ Differences vs upstream Marlin 2.1.1 (`398cae7`). 41 files modified, 3 added.
   preheat temperatures for the screen, `probe_extrusion_temp`,
   `probe_bed_temp`). **Incompatible with stock Marlin 2.1.1** — settings
   reset to defaults when switching firmware.
+
+---
+
+## Rebase onto Marlin 2.1.3-b3 (branch `rebase/marlin-2.1.3-b3`)
+
+The fork tree (safety branch `main` @ 869b3e4) was rebased onto upstream
+**Marlin 2.1.3-b3** (`58a4358809`) to pick up two years of upstream fixes
+and features — most notably **Input Shaping**, ft-motion, MMU3 support,
+host `ACTION`/prompt rework, `ADVANCE_K` (ex-`LIN_ADVANCE_K`), and the
+`SDSUPPORT` → `HAS_MEDIA` internal reorganization.
+
+### What was preserved
+
+- All Elegoo hardware support (MKS_E3D_V2 board 5261, `MKS_E3_V2` env,
+  `ZNP_ROBIN_NANO.bin` output) and the second LCD UART (`LCD_SERIAL_PORT 2`
+  + `LCD_SERIAL_PORT_2 6`).
+- The complete Elegoo TJC/DGUS screen stack (`lcd/extui/dgus/elegoo/`),
+  error pages, M10088, M600/M75-M78/M24-M25 integration, live ABL mesh
+  progress, and the RTS state machine in `DGUSDisplay::processRx()`.
+- All behavioral changes from section 3 (gated homing fix, thermal error
+  pages, pause/park behavior, PLR resume heat-floor change, explicit
+  `current_position` save) and the whole configuration from section 4.
+- The fork's custom EEPROM fields, now riding on upstream's **`V90`**
+  schema (settings reset once when flashing across versions).
+- Safety-branch fixes: `PID_autotune` re-enables `disable_all_heaters()`,
+  homing failure stays `MF_STOPPED` during jobs, M500 removed from the
+  SD-abort path, `tjc_page()` helper.
+
+### Key adaptations (2.1.1 → 2.1.3-b3 renames)
+
+| Fork (2.1.1) | Upstream (2.1.3-b3) |
+|---|---|
+| `SDSUPPORT` (config option unchanged) | internal `HAS_MEDIA` |
+| `LCD_SET_PROGRESS_MANUALLY` | `SET_PROGRESS_PERCENT` |
+| `EITHER` / `BOTH` | `ANY` / `ALL` |
+| `SDSS` | `SD_SS_PIN` |
+| `FAN_PIN` | `FAN0_PIN` |
+| `Z_PROBE_END_SCRIPT` | `EVENT_GCODE_AFTER_G29` |
+| `Z_PROBE_OFFSET_RANGE_MIN/MAX` | `PROBE_OFFSET_ZMIN/ZMAX` |
+| `LIN_ADVANCE_K` | `ADVANCE_K` |
+| `DISABLE_INACTIVE_*`, `DEFAULT_STEPPER_DEACTIVE_TIME` | `DISABLE_IDLE_*`, `DEFAULT_STEPPER_TIMEOUT_SEC` |
+| `EXPERIMENTAL_SCURVE` | removed (s-curve is standard now) |
+| `ALLOW_LOW_EJERK` | removed (deprecated) |
+| `IS_SD_INSERTED()` / `IS_SD_PRINTING()` / `get_num_Files()` | `card.isInserted()` / `card.isPrinting()` / `get_num_items()` |
+| `marlin_state = MF_RUNNING` | `MarlinState::MF_RUNNING` (scoped enum) |
+| `DGUSDisplay::Initialized` | `initialized` |
+| old-style `DGUS_LCD_UI_MKS` define | `DGUS_LCD_UI MKS` (compat-derived) |
+
+### Board-specific fix worth noting
+
+`pins_MKS_E3_V2.h` now defines the two fans **numerically**
+(`FAN0_PIN 7` = PA7, `AUTO_FAN_PIN 16` = PB0). The board variant maps
+ADC-capable pins to analog aliases (`PA7` → `A7`, `PB0` → `A8`) that are
+not preprocessor macros, so any preprocessor pin comparison (`_HAS_FAN`,
+the auto-fan sanity check) evaluated both pins as 0 and compared them
+"equal" — silently disabling the part-cooling fan under 2.1.3-b3's
+stricter `HAS_FAN0` derivation. Numeric pins make every comparison valid;
+the upstream auto-fan sanity check is kept enabled.
+
+### Size
+
+| | fork (2.1.1) | rebased (2.1.3-b3) |
+|---|---|---|
+| RAM | 26.0% (17024 B) | 26.2% (17144 B) |
+| Flash | 71.5% (187332 B) | 71.9% (188568 B) |
