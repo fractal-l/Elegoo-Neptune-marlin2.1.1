@@ -1,7 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
  * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
- * Copyright (c) 2016 Bob Cousins bobcousins42@googlemail.com
+ *
+ * Based on Sprinter and grbl.
+ * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,11 +37,11 @@
 #include "i2s.h"
 
 #if ENABLED(WIFISUPPORT)
-  #include "WebSocketSerial.h"
+  #include "wifi/WebSocketSerial.h"
 #endif
 
 #if ENABLED(ESP3D_WIFISUPPORT)
-  #include "esp3dlib.h"
+  #include <esp3dlib.h>
 #endif
 
 #include "FlushableHardwareSerial.h"
@@ -50,14 +52,12 @@
 
 #define MYSERIAL1 flushableSerial
 
-#if EITHER(WIFISUPPORT, ESP3D_WIFISUPPORT)
-  #if ENABLED(ESP3D_WIFISUPPORT)
-    typedef ForwardSerial1Class< decltype(Serial2Socket) > DefaultSerial1;
-    extern DefaultSerial1 MSerial0;
-    #define MYSERIAL2 MSerial0
-  #else
-    #define MYSERIAL2 webSocketSerial
-  #endif
+#if ENABLED(ESP3D_WIFISUPPORT)
+  typedef ForwardSerial1Class< decltype(Serial2Socket) > DefaultSerial1;
+  extern DefaultSerial1 MSerial0;
+  #define MYSERIAL2 MSerial0
+#elif ENABLED(WIFISUPPORT)
+  #define MYSERIAL2 webSocketSerial
 #endif
 
 #define CRITICAL_SECTION_START() portENTER_CRITICAL(&hal.spinlock)
@@ -165,13 +165,11 @@ int freeMemory();
 
 #pragma GCC diagnostic pop
 
-void _delay_ms(const int ms);
-
 // ------------------------
 // MarlinHAL Class
 // ------------------------
 
-#define HAL_ADC_VREF         3.3
+#define HAL_ADC_VREF_MV   3300
 #define HAL_ADC_RESOLUTION  10
 
 class MarlinHAL {
@@ -194,7 +192,7 @@ public:
   static void isr_on()  { if (spinlock.owner != portMUX_FREE_VAL) portEXIT_CRITICAL(&spinlock); }
   static void isr_off() { portENTER_CRITICAL(&spinlock); }
 
-  static void delay_ms(const int ms) { _delay_ms(ms); }
+  static void delay_ms(const int ms) { delay(ms); }
 
   // Tasks, called from idle()
   static void idletask();

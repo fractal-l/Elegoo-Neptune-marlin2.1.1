@@ -31,36 +31,36 @@
 #include "../../MarlinCore.h" // for idle()
 
 /**
- * M100 Free Memory Watcher
+ * M100: Free Memory Watcher
  *
  * This code watches the free memory block between the bottom of the heap and the top of the stack.
  * This memory block is initialized and watched via the M100 command.
  *
- * M100 I   Initializes the free memory block and prints vitals statistics about the area
+ * Parameters:
+ *   I  Initializes the free memory block and prints vitals statistics about the area
  *
- * M100 F   Identifies how much of the free memory block remains free and unused. It also
- *          detects and reports any corruption within the free memory block that may have
- *          happened due to errant firmware.
+ *   F  Identifies how much of the free memory block remains free and unused. It also
+ *      detects and reports any corruption within the free memory block that may have
+ *      happened due to errant firmware.
  *
- * M100 D   Does a hex display of the free memory block along with a flag for any errant
- *          data that does not match the expected value.
+ *   D  Does a hex display of the free memory block along with a flag for any errant
+ *      data that does not match the expected value.
  *
- * M100 C x Corrupts x locations within the free memory block. This is useful to check the
- *          correctness of the M100 F and M100 D commands.
+ *   C  x Corrupts x locations within the free memory block. This is useful to check the
+ *      correctness of the M100 F and M100 D commands.
  *
  * Also, there are two support functions that can be called from a developer's C code.
- *
- *    uint16_t check_for_free_memory_corruption(PGM_P const free_memory_start);
- *    void M100_dump_routine(FSTR_P const title, const char * const start, const uintptr_t size);
+ *   uint16_t check_for_free_memory_corruption(PGM_P const free_memory_start);
+ *   void M100_dump_routine(FSTR_P const title, const char * const start, const uintptr_t size);
  *
  * Initial version by Roxy-3D
  */
-#define M100_FREE_MEMORY_DUMPER     // Enable for the `M100 D` Dump sub-command
-#define M100_FREE_MEMORY_CORRUPTOR  // Enable for the `M100 C` Corrupt sub-command
+#define M100_FREE_MEMORY_DUMPER     // Enable for the 'M100 D' Dump sub-command
+#define M100_FREE_MEMORY_CORRUPTOR  // Enable for the 'M100 C' Corrupt sub-command
 
 #define TEST_BYTE ((char) 0xE5)
 
-#if EITHER(__AVR__, IS_32BIT_TEENSY)
+#if ANY(__AVR__, IS_32BIT_TEENSY) && !IS_TEENSY_40_41
 
   extern char __bss_end;
   char *end_bss = &__bss_end,
@@ -163,14 +163,14 @@ inline int32_t count_test_bytes(const char * const start_free_memory) {
     while (start_free_memory < end_free_memory) {
       print_hex_address(start_free_memory);             // Print the address
       SERIAL_CHAR(':');
-      LOOP_L_N(i, 16) {  // and 16 data bytes
+      for (uint8_t i = 0; i < 16; ++i) {  // and 16 data bytes
         if (i == 8) SERIAL_CHAR('-');
         print_hex_byte(start_free_memory[i]);
         SERIAL_CHAR(' ');
       }
       serial_delay(25);
       SERIAL_CHAR('|');                   // Point out non test bytes
-      LOOP_L_N(i, 16) {
+      for (uint8_t i = 0; i < 16; ++i) {
         char ccc = (char)start_free_memory[i]; // cast to char before automatically casting to char on assignment, in case the compiler is broken
         ccc = (ccc == TEST_BYTE) ? ' ' : '?';
         SERIAL_CHAR(ccc);
@@ -183,7 +183,7 @@ inline int32_t count_test_bytes(const char * const start_free_memory) {
   }
 
   void M100_dump_routine(FSTR_P const title, const char * const start, const uintptr_t size) {
-    SERIAL_ECHOLNF(title);
+    SERIAL_ECHOLN(title);
     //
     // Round the start and end locations to produce full lines of output
     //
@@ -197,7 +197,7 @@ inline int32_t count_test_bytes(const char * const start_free_memory) {
 #endif // M100_FREE_MEMORY_DUMPER
 
 inline int check_for_free_memory_corruption(FSTR_P const title) {
-  SERIAL_ECHOF(title);
+  SERIAL_ECHO(title);
 
   char *start_free_memory = free_memory_start, *end_free_memory = free_memory_end;
   int n = end_free_memory - start_free_memory;

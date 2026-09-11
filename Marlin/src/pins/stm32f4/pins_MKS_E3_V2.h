@@ -80,7 +80,11 @@
 //
 // Auto fans
 //
-#define AUTO_FAN_PIN                        PB0    //FAN2
+// Numeric form of PB0 (digital pin 16): the "A8" analog alias used by the
+// variant for PB0 is not a preprocessor macro, which breaks pin-equality
+// checks like _HAS_FAN / the auto-fan sanity check (both pins would
+// evaluate to 0 and compare equal).
+#define AUTO_FAN_PIN                        16     // PB0 - FAN2 (hotend auto fan)
 #ifndef E0_AUTO_FAN_PIN
   #define E0_AUTO_FAN_PIN           AUTO_FAN_PIN
 #endif
@@ -90,7 +94,7 @@
 //
 #define HEATER_0_PIN                        PA6    // "HE"
 #define HEATER_BED_PIN                      PA5    // "HB"
-#define FAN_PIN                             PA7    // FAN1
+#define FAN0_PIN                            7      // PA7 - FAN1 (part cooling fan; numeric, see AUTO_FAN_PIN note)
 
 //
 // Filament Runout Sensor
@@ -100,7 +104,7 @@
 // Use one of these or SDCard-based Emulation will be used
 //#define SRAM_EEPROM_EMULATION                   // Use BackSRAM-based EEPROM emulation
 //#define FLASH_EEPROM_EMULATION                  // Use Flash-based EEPROM emulation
-#if EITHER(NO_EEPROM_SELECTED, I2C_EEPROM)
+#if ANY(NO_EEPROM_SELECTED, I2C_EEPROM)
   #define I2C_EEPROM
   #define MARLIN_EEPROM_SIZE                0x2000   //0x1000  // 4KB
   #define I2C_SCL_PIN                       PB6
@@ -124,8 +128,7 @@
 #endif
 #if SD_CONNECTION_IS(ONBOARD)
   #define ENABLE_SPI3
-  #define SD_SS_PIN                         -1
-  #define SDSS                              PB12
+  #define SD_SS_PIN                              PB12
   #define SD_SCK_PIN                        PB13
   #define SD_MISO_PIN                       PB14
   #define SD_MOSI_PIN                       PB15
@@ -135,3 +138,4 @@
 
 // Ignore temp readings during development.
 //#define BOGUS_TEMPERATURE_GRACE_PERIOD    2000
+

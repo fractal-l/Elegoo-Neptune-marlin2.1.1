@@ -41,24 +41,23 @@
 
 /**
  * M75: Start print timer
+ *
+ * ProUI: If the print fails to start and any text is
+ *        included in the command, print it in the header.
  */
 void GcodeSuite::M75() {
-  startOrResumeJob();
+  startOrResumeJob(); // ... ExtUI::onPrintTimerStarted()
 
-    //DWIN_Print_Started(false);
-    //if (!IS_SD_PRINTING()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
   #if ENABLED(TJC_AVAILABLE)
     tjc_page("printpause");
     restFlag1 = 0;
     LCD_SERIAL_2.printf("restFlag1=0");  //9999----打印界面显示：1-恢复按钮 0-暂停按钮
     LCD_SERIAL_2.printf("\xff\xff\xff");
-
-
   #endif
 
   #if ENABLED(DWIN_LCD_PROUI)
-    DWIN_Print_Started(false);
-    if (!IS_SD_PRINTING()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
+    // TODO: Remove if M75 <string> is never used
+    if (!card.isStillPrinting()) dwinPrintHeader(parser.has_string() ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
   #endif
 }
 
@@ -66,26 +65,17 @@ void GcodeSuite::M75() {
  * M76: Pause print timer
  */
 void GcodeSuite::M76() {
-            restFlag1 = 1;//9999----打印界面显示：同时判断restFlag1 = 1  restFlag2 = 0      1-恢复按钮 0-暂停按钮
-            restFlag2 = 0;
-            LCD_SERIAL_2.printf("restFlag1=1");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
-            LCD_SERIAL_2.printf("restFlag2=0");
-            LCD_SERIAL_2.printf("\xff\xff\xff");
-
   #if ENABLED(TJC_AVAILABLE)
-        //TERN_(HOST_PROMPT_SUPPORT, hostui.prompt_open(PROMPT_PAUSE_RESUME, F("Pause SD"), F("Resume")));
-        //hostui.pause();
-        //queue.enqueue_now_P(PSTR("M25"));
-        // queue.inject(F("M10088"));
-    // LCD_SERIAL_2.printf("page printpause"); 
-    // LCD_SERIAL_2.printf("restFlag1=0");  //9999----打印界面显示：1-恢复按钮 0-暂停按钮
-    // LCD_SERIAL_2.printf("\xff\xff\xff");
+    restFlag1 = 1;  //9999----打印界面显示：同时判断restFlag1 = 1  restFlag2 = 0      1-恢复按钮 0-暂停按钮
+    restFlag2 = 0;
+    LCD_SERIAL_2.printf("restFlag1=1");
+    LCD_SERIAL_2.printf("\xff\xff\xff");
+    LCD_SERIAL_2.printf("restFlag2=0");
+    LCD_SERIAL_2.printf("\xff\xff\xff");
   #endif
 
-  print_job_timer.pause();
+  print_job_timer.pause(); // ... ExtUI::onPrintTimerPaused()
   TERN_(HOST_PAUSE_M76, hostui.pause());
-  TERN_(DWIN_LCD_PROUI, DWIN_Print_Pause());
 }
 
 /**
@@ -96,7 +86,7 @@ void GcodeSuite::M77() {
 
   #if ENABLED(TJC_AVAILABLE) 
     //DWIN_Print_Started(false);
-    //if (!IS_SD_PRINTING()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
+    //if (!card.isPrinting()) DWIN_Print_Header(parser.string_arg && parser.string_arg[0] ? parser.string_arg : GET_TEXT(MSG_HOST_START_PRINT));
 
   tjc_page("main");
   
@@ -104,7 +94,6 @@ void GcodeSuite::M77() {
 
 
   print_job_timer.stop();
-  TERN_(DWIN_LCD_PROUI, DWIN_Print_Finished());
 }
 
 #if ENABLED(PRINTCOUNTER)

@@ -65,8 +65,8 @@
   float zprobe_zoffset;
   float last_zoffset = 0.0;
 
-  //float manual_feedrate_mm_m[] = {50 * 60, 50 * 60, 4 * 60, 150};
-  float manual_feedrate_mm_m[] = {50 * 60, 50 * 60, 4 * 60, 150};
+  //float rts_manual_feedrate_mm_m[] = {50 * 60, 50 * 60, 4 * 60, 150};
+  float rts_manual_feedrate_mm_m[] = {50 * 60, 50 * 60, 4 * 60, 150};
 
   //bed_mesh_t z_values;
   uint8_t showcount = 0;
@@ -223,7 +223,7 @@
   {
     if (!planner.is_full())
     {
-      planner.buffer_line(current_position, MMM_TO_MMS(manual_feedrate_mm_m[(int8_t)axis]), active_extruder);
+      planner.buffer_line(current_position, MMM_TO_MMS(rts_manual_feedrate_mm_m[(int8_t)axis]), active_extruder);
     }
   }
 
@@ -467,7 +467,7 @@
 
     if(CardReader::flag.mounted)
     {
-      uint16_t fileCnt = card.get_num_Files();
+      uint16_t fileCnt = card.get_num_items();
 
       card.getWorkDirName();
       if(card.filename[0] != '/')
@@ -676,7 +676,7 @@
         }
       }
 
-      lcd_sd_status = IS_SD_INSERTED();
+      lcd_sd_status = card.isInserted();
     }
     else
     {
@@ -780,7 +780,7 @@
     static bool flag_stable;
     static uint32_t stable_point_time;
 
-    bool tmp = IS_SD_INSERTED();
+    bool tmp = card.isInserted();
 
     if(tmp != last)
     {
@@ -2028,7 +2028,7 @@
     
     rtscheck.RTS_SDCardUpate(); // Check the status of card
 
-    if( (enable_filment_check || RTS_M600_Flag)  && IS_SD_PRINTING())
+    if( (enable_filment_check || RTS_M600_Flag)  && card.isPrinting())
     {
       #if ENABLED(CHECKFILEMENT)
          
@@ -2983,7 +2983,7 @@
         }
         else if(recdat.data[0] == 0x01)
         {
-          if(IS_SD_PRINTING())
+          if(card.isPrinting())
           {
             #if ENABLED(TJC_AVAILABLE)
               tjc_page("pauseconfirm");
@@ -3584,7 +3584,7 @@
           {
             zprobe_zoffset = ((float)recdat.data[0]) / 100;
           }
-          if(WITHIN((zprobe_zoffset), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX))
+          if(WITHIN((zprobe_zoffset), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX))
           {
             babystep.add_mm(Z_AXIS, zprobe_zoffset - last_zoffset);
           }
@@ -4870,13 +4870,13 @@
         #endif
 
         #if ENABLED(TJC_AVAILABLE)
-          manual_feedrate_mm_m[E_AXIS] = ( ((recdat.data[0] & 0xFF00) >> 8) | ((recdat.data[0] & 0x00FF)<<8));
+          rts_manual_feedrate_mm_m[E_AXIS] = ( ((recdat.data[0] & 0xFF00) >> 8) | ((recdat.data[0] & 0x00FF)<<8));
           memset(temp,0,sizeof(temp));
-          sprintf(temp, "prefilament.filamentspeed.txt=\"%d\"", (int)manual_feedrate_mm_m[E_AXIS]);
+          sprintf(temp, "prefilament.filamentspeed.txt=\"%d\"", (int)rts_manual_feedrate_mm_m[E_AXIS]);
           LCD_SERIAL_2.printf(temp);
           LCD_SERIAL_2.printf("\xff\xff\xff");         
         #else
-          manual_feedrate_mm_m[E_AXIS] = ((float)recdat.data[0] / 10);
+          rts_manual_feedrate_mm_m[E_AXIS] = ((float)recdat.data[0] / 10);
         #endif
       }
       break;
@@ -5251,7 +5251,7 @@
             LCD_SERIAL_2.printf("\xff\xff\xff");
 
             memset(temp,0,sizeof(temp));
-            sprintf(temp, "prefilament.filamentspeed.txt=\"%d\"", (int)manual_feedrate_mm_m[E_AXIS]);
+            sprintf(temp, "prefilament.filamentspeed.txt=\"%d\"", (int)rts_manual_feedrate_mm_m[E_AXIS]);
             LCD_SERIAL_2.printf(temp);
             LCD_SERIAL_2.printf("\xff\xff\xff");    
           #endif
@@ -5314,7 +5314,7 @@
         else if (recdat.data[0] == 3)
         {
           #if HAS_MULTI_HOTEND
-            if (WITHIN((XoffsetValue), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX))
+            if (WITHIN((XoffsetValue), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX))
             {
               //hotend_offset[1].x = X2_MAX_POS + XoffsetValue;
             }
@@ -5396,9 +5396,9 @@
         {
           #if ENABLED(BABYSTEPPING)
             last_zoffset = probe.offset.z;
-            //if (WITHIN((zprobe_zoffset + 0.1), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX))
+            //if (WITHIN((zprobe_zoffset + 0.1), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX))
             
-            if (WITHIN((probe.offset.z + zoffset_unit), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX))
+            if (WITHIN((probe.offset.z + zoffset_unit), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX))
             {
               #if ENABLED(HAS_LEVELING)
                 zprobe_zoffset = (probe.offset.z + zoffset_unit);
@@ -5428,7 +5428,7 @@
         {
           #if ENABLED(BABYSTEPPING)
             last_zoffset = probe.offset.z;
-            if (WITHIN((probe.offset.z - zoffset_unit), Z_PROBE_OFFSET_RANGE_MIN, Z_PROBE_OFFSET_RANGE_MAX))
+            if (WITHIN((probe.offset.z - zoffset_unit), PROBE_OFFSET_ZMIN, PROBE_OFFSET_ZMAX))
             {
               zprobe_zoffset = (probe.offset.z - zoffset_unit);
               babystep.add_mm(Z_AXIS, zprobe_zoffset - last_zoffset);
@@ -7888,7 +7888,7 @@
         RTS_SndData(CardRecbuf.Cardshowfilename[CardRecbuf.recordcount], PRINT_FILE_TEXT_VP);
 
         // represents to update file list
-        if (CardUpdate && lcd_sd_status && IS_SD_INSERTED())
+        if (CardUpdate && lcd_sd_status && card.isInserted())
         {
           for (uint16_t i = 0; i < CardRecbuf.Filesum; i++)
           {

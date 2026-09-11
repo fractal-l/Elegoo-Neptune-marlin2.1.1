@@ -26,7 +26,7 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if BOTH(HAS_MARLINUI_MENU, ADVANCED_PAUSE_FEATURE)
+#if ALL(HAS_MARLINUI_MENU, ADVANCED_PAUSE_FEATURE)
 
 #include "menu_item.h"
 #include "../../module/temperature.h"
@@ -96,7 +96,7 @@ void _menu_temp_filament_op(const PauseMode mode, const int8_t extruder) {
   if (LCD_HEIGHT >= 4) STATIC_ITEM_F(change_filament_header(mode), SS_DEFAULT|SS_INVERT);
   BACK_ITEM(MSG_BACK);
   #if HAS_PREHEAT
-    LOOP_L_N(m, PREHEAT_COUNT)
+    for (uint8_t m = 0; m < PREHEAT_COUNT; ++m)
       ACTION_ITEM_N_f(m, ui.get_preheat_label(m), MSG_PREHEAT_M, _change_filament_with_preset);
   #endif
   EDIT_ITEM_FAST_N(int3, extruder, MSG_PREHEAT_CUSTOM, &thermalManager.temp_hotend[extruder].target,
@@ -130,7 +130,7 @@ void menu_change_filament() {
     #endif
 
     START_MENU();
-    BACK_ITEM(MSG_MAIN);
+    BACK_ITEM(MSG_MAIN_MENU);
 
     // Change filament
     #if E_STEPPERS == 1
@@ -141,7 +141,7 @@ void menu_change_filament() {
         GCODES_ITEM_F(fmsg, F("M600 B0"));
     #else
       FSTR_P const fmsg = GET_TEXT_F(MSG_FILAMENTCHANGE_E);
-      LOOP_L_N(s, E_STEPPERS) {
+      for (uint8_t s = 0; s < E_STEPPERS; ++s) {
         if (thermalManager.targetTooColdToExtrude(s))
           SUBMENU_N_F(s, fmsg, []{ _menu_temp_filament_op(PAUSE_MODE_CHANGE_FILAMENT, MenuItemBase::itemIndex); });
         else {
@@ -166,7 +166,7 @@ void menu_change_filament() {
             GCODES_ITEM_F(msg_load, F("M701"));
         #else
           FSTR_P const msg_load = GET_TEXT_F(MSG_FILAMENTLOAD_E);
-          LOOP_L_N(s, E_STEPPERS) {
+          for (uint8_t s = 0; s < E_STEPPERS; ++s) {
             if (thermalManager.targetTooColdToExtrude(s))
               SUBMENU_N_F(s, msg_load, []{ _menu_temp_filament_op(PAUSE_MODE_LOAD_FILAMENT, MenuItemBase::itemIndex); });
             else {
@@ -194,7 +194,7 @@ void menu_change_filament() {
               GCODES_ITEM(MSG_FILAMENTUNLOAD_ALL, F("M702"));
           #endif
           FSTR_P const msg_unload = GET_TEXT_F(MSG_FILAMENTUNLOAD_E);
-          LOOP_L_N(s, E_STEPPERS) {
+          for (uint8_t s = 0; s < E_STEPPERS; ++s) {
             if (thermalManager.targetTooColdToExtrude(s))
               SUBMENU_N_F(s, msg_unload, []{ _menu_temp_filament_op(PAUSE_MODE_UNLOAD_FILAMENT, MenuItemBase::itemIndex); });
             else {
@@ -235,21 +235,24 @@ static FSTR_P pause_header() {
 
 // Portions from STATIC_ITEM...
 #define HOTEND_STATUS_ITEM() do { \
-  if (_menuLineNr == _thisItemNr) { \
+  if ( MY_LINE()) { \
     if (ui.should_draw()) { \
       IF_DISABLED(HAS_GRAPHICAL_TFT, MenuItem_static::draw(_lcdLineNr, GET_TEXT_F(MSG_FILAMENT_CHANGE_NOZZLE), SS_INVERT)); \
       ui.draw_hotend_status(_lcdLineNr, hotend_status_extruder); \
     } \
-    if (_skipStatic && encoderLine <= _thisItemNr) { \
-      ui.encoderPosition += ENCODER_STEPS_PER_MENU_ITEM; \
-      ++encoderLine; \
-    } \
+    STATIC_SKIP(); \
     ui.refresh(LCDVIEW_CALL_REDRAW_NEXT); \
   } \
-  ++_thisItemNr; \
+  NEXT_ITEM(); \
 }while(0)
 
 void menu_pause_option() {
+  #if HAS_FILAMENT_SENSOR
+    const bool still_out = runout.filament_ran_out;
+  #else
+    constexpr bool still_out = false;
+  #endif
+
   START_MENU();
   #if LCD_HEIGHT > 2
     STATIC_ITEM(MSG_FILAMENT_CHANGE_OPTION_HEADER);
@@ -257,11 +260,8 @@ void menu_pause_option() {
   ACTION_ITEM(MSG_FILAMENT_CHANGE_OPTION_PURGE, []{ pause_menu_response = PAUSE_RESPONSE_EXTRUDE_MORE; });
 
   #if HAS_FILAMENT_SENSOR
-    const bool still_out = runout.filament_ran_out;
     if (still_out)
       EDIT_ITEM(bool, MSG_RUNOUT_SENSOR, &runout.enabled, runout.reset);
-  #else
-    constexpr bool still_out = false;
   #endif
 
   if (!still_out)
@@ -304,11 +304,9 @@ void lcd_pause_waiting_message()  { _lcd_pause_message(GET_TEXT_F(MSG_ADVANCED_P
 void lcd_pause_resume_message()   { _lcd_pause_message(GET_TEXT_F(MSG_FILAMENT_CHANGE_RESUME));  }
 
 void lcd_pause_purge_message() {
-  #if ENABLED(ADVANCED_PAUSE_CONTINUOUS_PURGE)
-    _lcd_pause_message(GET_TEXT_F(MSG_FILAMENT_CHANGE_CONT_PURGE));
-  #else
-    _lcd_pause_message(GET_TEXT_F(MSG_FILAMENT_CHANGE_PURGE));
-  #endif
+  _lcd_pause_message(GET_TEXT_F(
+    TERN(ADVANCED_PAUSE_CONTINUOUS_PURGE, MSG_FILAMENT_CHANGE_CONT_PURGE, MSG_FILAMENT_CHANGE_PURGE)
+  ));
 }
 
 FORCE_INLINE screenFunc_t ap_message_screen(const PauseMessage message) {

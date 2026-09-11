@@ -8,8 +8,8 @@
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; Copyright (c) 2017 STMicroelectronics.
-  * All rights reserved.</center></h2>
+  * Copyright (c) 2017 STMicroelectronics.
+  * All rights reserved.
   *
   * This software component is licensed by ST under BSD 3-Clause license,
   * the "License"; You may not use this file except in compliance with the
@@ -34,56 +34,154 @@
 /**
   * @brief This is the list of modules to be used in the HAL driver
   */
-#define HAL_MODULE_ENABLED
-#define HAL_ADC_MODULE_ENABLED
-#define HAL_DMA_MODULE_ENABLED
-#define HAL_FLASH_MODULE_ENABLED
-#define HAL_GPIO_MODULE_ENABLED
-#define HAL_EXTI_MODULE_ENABLED   // Needed for Endstop (and other external) Interrupts
-#define HAL_PWR_MODULE_ENABLED
-#define HAL_RCC_MODULE_ENABLED
-#define HAL_SPI_MODULE_ENABLED
-#define HAL_TIM_MODULE_ENABLED
-#define HAL_USART_MODULE_ENABLED
-#define HAL_CORTEX_MODULE_ENABLED
-#define HAL_PCD_MODULE_ENABLED
-//#define HAL_UART_MODULE_ENABLED // by default
+#ifndef HAL_MODULE_ENABLED
+  #define HAL_MODULE_ENABLED
+#endif
+#ifndef HAL_ADC_MODULE_ENABLED
+  #define HAL_ADC_MODULE_ENABLED
+#endif
+#ifndef HAL_DMA_MODULE_ENABLED
+  #define HAL_DMA_MODULE_ENABLED
+#endif
+#ifndef HAL_FLASH_MODULE_ENABLED
+  #define HAL_FLASH_MODULE_ENABLED
+#endif
+#ifndef HAL_GPIO_MODULE_ENABLED
+  #define HAL_GPIO_MODULE_ENABLED
+#endif
+#ifndef HAL_EXTI_MODULE_ENABLED
+  #define HAL_EXTI_MODULE_ENABLED // Needed for Endstop (and other external) Interrupts
+#endif
+#ifndef HAL_PWR_MODULE_ENABLED
+  #define HAL_PWR_MODULE_ENABLED
+#endif
+#ifndef HAL_RCC_MODULE_ENABLED
+  #define HAL_RCC_MODULE_ENABLED
+#endif
+#ifndef HAL_SPI_MODULE_ENABLED
+  #define HAL_SPI_MODULE_ENABLED
+#endif
+#ifndef HAL_TIM_MODULE_ENABLED
+  #define HAL_TIM_MODULE_ENABLED
+#endif
+#ifndef HAL_USART_MODULE_ENABLED
+  #define HAL_USART_MODULE_ENABLED
+#endif
+#ifndef HAL_CORTEX_MODULE_ENABLED
+  #define HAL_CORTEX_MODULE_ENABLED
+#endif
+#ifndef HAL_PCD_MODULE_ENABLED
+  #define HAL_PCD_MODULE_ENABLED
+#endif
+#ifndef HAL_UART_MODULE_ENABLED
+  //#define HAL_UART_MODULE_ENABLED // by default
+#endif
 
-//#define HAL_CAN_MODULE_ENABLED
-//#define HAL_CAN_LEGACY_MODULE_ENABLED
-//#define HAL_CRC_MODULE_ENABLED
-//#define HAL_CEC_MODULE_ENABLED
-//#define HAL_CRYP_MODULE_ENABLED
-//#define HAL_DAC_MODULE_ENABLED
-//#define HAL_DCMI_MODULE_ENABLED
-//#define HAL_DMA2D_MODULE_ENABLED
-//#define HAL_ETH_MODULE_ENABLED
-//#define HAL_NAND_MODULE_ENABLED
-//#define HAL_NOR_MODULE_ENABLED
-//#define HAL_PCCARD_MODULE_ENABLED
-//#define HAL_SRAM_MODULE_ENABLED
-//#define HAL_SDRAM_MODULE_ENABLED
-//#define HAL_HASH_MODULE_ENABLED
-//#define HAL_I2C_MODULE_ENABLED
-//#define HAL_SMBUS_MODULE_ENABLED
-//#define HAL_I2S_MODULE_ENABLED
-//#define HAL_IWDG_MODULE_ENABLED
-//#define HAL_LTDC_MODULE_ENABLED
-//#define HAL_DSI_MODULE_ENABLED
-//#define HAL_QSPI_MODULE_ENABLED
-//#define HAL_RNG_MODULE_ENABLED
-//#define HAL_RTC_MODULE_ENABLED
-//#define HAL_SAI_MODULE_ENABLED
-//#define HAL_SD_MODULE_ENABLED
-//#define HAL_IRDA_MODULE_ENABLED
-//#define HAL_SMARTCARD_MODULE_ENABLED
-//#define HAL_WWDG_MODULE_ENABLED
-//#define HAL_HCD_MODULE_ENABLED
-//#define HAL_FMPI2C_MODULE_ENABLED
-//#define HAL_SPDIFRX_MODULE_ENABLED
-//#define HAL_DFSDM_MODULE_ENABLED
-//#define HAL_LPTIM_MODULE_ENABLED
-//#define HAL_MMC_MODULE_ENABLED
+#ifndef HAL_CAN_MODULE_ENABLED
+  //#define HAL_CAN_MODULE_ENABLED
+#endif
+#ifndef HAL_CAN_LEGACY_MODULE_ENABLED
+  //#define HAL_CAN_LEGACY_MODULE_ENABLED
+#endif
+#ifndef HAL_CRC_MODULE_ENABLED
+  //#define HAL_CRC_MODULE_ENABLED
+#endif
+#ifndef HAL_CEC_MODULE_ENABLED
+  //#define HAL_CEC_MODULE_ENABLED
+#endif
+#ifndef HAL_CRYP_MODULE_ENABLED
+  //#define HAL_CRYP_MODULE_ENABLED
+#endif
+#ifndef HAL_DAC_MODULE_ENABLED
+  //#define HAL_DAC_MODULE_ENABLED
+#endif
+#ifndef HAL_DCMI_MODULE_ENABLED
+  //#define HAL_DCMI_MODULE_ENABLED
+#endif
+#ifndef HAL_DMA2D_MODULE_ENABLED
+  //#define HAL_DMA2D_MODULE_ENABLED
+#endif
+#ifndef HAL_ETH_MODULE_ENABLED
+  //#define HAL_ETH_MODULE_ENABLED
+#endif
+#ifndef HAL_NAND_MODULE_ENABLED
+  //#define HAL_NAND_MODULE_ENABLED
+#endif
+#ifndef HAL_NOR_MODULE_ENABLED
+  //#define HAL_NOR_MODULE_ENABLED
+#endif
+#ifndef HAL_PCCARD_MODULE_ENABLED
+  //#define HAL_PCCARD_MODULE_ENABLED
+#endif
+#ifndef HAL_SRAM_MODULE_ENABLED
+  //#define HAL_SRAM_MODULE_ENABLED
+#endif
+#ifndef HAL_SDRAM_MODULE_ENABLED
+  //#define HAL_SDRAM_MODULE_ENABLED
+#endif
+#ifndef HAL_HASH_MODULE_ENABLED
+  //#define HAL_HASH_MODULE_ENABLED
+#endif
+#ifndef HAL_I2C_MODULE_ENABLED
+  //#define HAL_I2C_MODULE_ENABLED
+#endif
+#ifndef HAL_SMBUS_MODULE_ENABLED
+  //#define HAL_SMBUS_MODULE_ENABLED
+#endif
+#ifndef HAL_I2S_MODULE_ENABLED
+  //#define HAL_I2S_MODULE_ENABLED
+#endif
+#ifndef HAL_IWDG_MODULE_ENABLED
+  //#define HAL_IWDG_MODULE_ENABLED
+#endif
+#ifndef HAL_LTDC_MODULE_ENABLED
+  //#define HAL_LTDC_MODULE_ENABLED
+#endif
+#ifndef HAL_DSI_MODULE_ENABLED
+  //#define HAL_DSI_MODULE_ENABLED
+#endif
+#ifndef HAL_QSPI_MODULE_ENABLED
+  //#define HAL_QSPI_MODULE_ENABLED
+#endif
+#ifndef HAL_RNG_MODULE_ENABLED
+  //#define HAL_RNG_MODULE_ENABLED
+#endif
+#ifndef HAL_RTC_MODULE_ENABLED
+  //#define HAL_RTC_MODULE_ENABLED
+#endif
+#ifndef HAL_SAI_MODULE_ENABLED
+  //#define HAL_SAI_MODULE_ENABLED
+#endif
+#ifndef HAL_SD_MODULE_ENABLED
+  //#define HAL_SD_MODULE_ENABLED
+#endif
+#ifndef HAL_IRDA_MODULE_ENABLED
+  //#define HAL_IRDA_MODULE_ENABLED
+#endif
+#ifndef HAL_SMARTCARD_MODULE_ENABLED
+  //#define HAL_SMARTCARD_MODULE_ENABLED
+#endif
+#ifndef HAL_WWDG_MODULE_ENABLED
+  //#define HAL_WWDG_MODULE_ENABLED
+#endif
+#ifndef HAL_HCD_MODULE_ENABLED
+  //#define HAL_HCD_MODULE_ENABLED
+#endif
+#ifndef HAL_FMPI2C_MODULE_ENABLED
+  //#define HAL_FMPI2C_MODULE_ENABLED
+#endif
+#ifndef HAL_SPDIFRX_MODULE_ENABLED
+  //#define HAL_SPDIFRX_MODULE_ENABLED
+#endif
+#ifndef HAL_DFSDM_MODULE_ENABLED
+  //#define HAL_DFSDM_MODULE_ENABLED
+#endif
+#ifndef HAL_LPTIM_MODULE_ENABLED
+  //#define HAL_LPTIM_MODULE_ENABLED
+#endif
+#ifndef HAL_MMC_MODULE_ENABLED
+  //#define HAL_MMC_MODULE_ENABLED
+#endif
 
 /* ########################## HSE/HSI Values adaptation ##################### */
 /**
@@ -91,11 +189,11 @@
   *        This value is used by the RCC HAL module to compute the system frequency
   *        (when HSE is used as system clock source, directly or through the PLL).
   */
-#if !defined  (HSE_VALUE)
+#ifndef HSE_VALUE
   #define HSE_VALUE              25000000U /*!< Value of the External oscillator in Hz */
 #endif /* HSE_VALUE */
 
-#if !defined  (HSE_STARTUP_TIMEOUT)
+#ifndef HSE_STARTUP_TIMEOUT
   #define HSE_STARTUP_TIMEOUT    100U      /*!< Time out for HSE start up, in ms */
 #endif /* HSE_STARTUP_TIMEOUT */
 
@@ -104,14 +202,14 @@
   *        This value is used by the RCC HAL module to compute the system frequency
   *        (when HSI is used as system clock source, directly or through the PLL).
   */
-#if !defined  (HSI_VALUE)
+#ifndef HSI_VALUE
   #define HSI_VALUE              16000000U /*!< Value of the Internal oscillator in Hz */
 #endif /* HSI_VALUE */
 
 /**
   * @brief Internal Low Speed oscillator (LSI) value.
   */
-#if !defined  (LSI_VALUE)
+#ifndef LSI_VALUE
  #define LSI_VALUE               32000U    /*!< LSI Typical Value in Hz */
 #endif /* LSI_VALUE */                     /*!< Value of the Internal Low Speed oscillator in Hz
                                                 The real value may vary depending on the variations
@@ -119,11 +217,11 @@
 /**
   * @brief External Low Speed oscillator (LSE) value.
   */
-#if !defined  (LSE_VALUE)
+#ifndef LSE_VALUE
  #define LSE_VALUE               32768U    /*!< Value of the External Low Speed oscillator in Hz */
 #endif /* LSE_VALUE */
 
-#if !defined  (LSE_STARTUP_TIMEOUT)
+#ifndef LSE_STARTUP_TIMEOUT
   #define LSE_STARTUP_TIMEOUT    5000U     /*!< Time out for LSE start up, in ms */
 #endif /* LSE_STARTUP_TIMEOUT */
 
@@ -132,7 +230,7 @@
   *        This value is used by the I2S HAL module to compute the I2S clock source
   *        frequency, this source is inserted directly through I2S_CKIN pad.
   */
-#if !defined  (EXTERNAL_CLOCK_VALUE)
+#ifndef EXTERNAL_CLOCK_VALUE
   #define EXTERNAL_CLOCK_VALUE     12288000U /*!< Value of the External oscillator in Hz*/
 #endif /* EXTERNAL_CLOCK_VALUE */
 

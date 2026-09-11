@@ -1,10 +1,9 @@
 /**
  * Marlin 3D Printer Firmware
- *
  * Copyright (c) 2020 MarlinFirmware [https://github.com/MarlinFirmware/Marlin]
- * Copyright (c) 2016 Bob Cousins bobcousins42@googlemail.com
- * Copyright (c) 2015-2016 Nico Tonnhofer wurstnase.reprap@gmail.com
- * Copyright (c) 2017 Victor Perez
+ *
+ * Based on Sprinter and grbl.
+ * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +43,8 @@
 #endif
 
 #if HAS_SD_HOST_DRIVE
-  #include "msc_sd.h"
-  #include "usbd_cdc_if.h"
+  #include "sd/msc_sd.h"
+  #include <usbd_cdc_if.h>
 #endif
 
 // ------------------------
@@ -70,8 +69,8 @@ void MarlinHAL::init() {
   constexpr int cpuFreq = F_CPU;
   UNUSED(cpuFreq);
 
-  #if ENABLED(SDSUPPORT) && DISABLED(SDIO_SUPPORT) && (defined(SDSS) && SDSS != -1)
-    OUT_WRITE(SDSS, HIGH); // Try to set SDSS inactive before any other SPI users start up
+  #if HAS_MEDIA && DISABLED(ONBOARD_SDIO) && PIN_EXISTS(SD_SS)
+    OUT_WRITE(SD_SS_PIN, HIGH); // Try to set SDSS inactive before any other SPI users start up
   #endif
 
   #if PIN_EXISTS(LED)
@@ -93,7 +92,7 @@ void MarlinHAL::init() {
 
   SetTimerInterruptPriorities();
 
-  #if ENABLED(EMERGENCY_PARSER) && (USBD_USE_CDC || USBD_USE_CDC_MSC)
+  #if ENABLED(EMERGENCY_PARSER) && ANY(USBD_USE_CDC, USBD_USE_CDC_MSC)
     USB_Hook_init();
   #endif
 
@@ -103,7 +102,7 @@ void MarlinHAL::init() {
 
   #if PIN_EXISTS(USB_CONNECT)
     OUT_WRITE(USB_CONNECT_PIN, !USB_CONNECT_INVERTING); // USB clear connection
-    delay(1000);                                        // Give OS time to notice
+    delay_ms(1000);                                     // Give OS time to notice
     WRITE(USB_CONNECT_PIN, USB_CONNECT_INVERTING);
   #endif
 }
