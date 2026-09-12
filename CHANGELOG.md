@@ -28,7 +28,9 @@ FractalUI dropped (not in `main` — confirmed, nothing to remove).
   `INPUT_SHAPING_X/Y` (ZV @ 35 Hz default, tune via `M593` in an SD
   `.gcode` file + `M500`). `FT_MOTION` deliberately off (full retune +
   more RAM). `LIN_ADVANCE` kept.
-- **sensors/safety:** `FILAMENT_RUNOUT_SENSOR` on (PB4, LOW = empty),
+- **sensors/safety:** runout stays handled by the Elegoo TJC UI (polls
+  PB4 directly + `nofilament` pages) — the stock `FILAMENT_RUNOUT_SENSOR`
+  is SanityCheck-forbidden under `DGUS_LCD_UI_MKS` and would double-fire.
   `EEPROM_AUTO_INIT`, `PID_EDIT_MENU` + `PID_AUTOTUNE_MENU`,
   `PRINTCOUNTER` (save at end of print), `CANCEL_OBJECTS` + reporting,
   `GCODE_MACROS`, `POWER_LOSS_MIN_Z_CHANGE 0.08→0.5` (less SD wear).
@@ -45,6 +47,12 @@ FractalUI dropped (not in `main` — confirmed, nothing to remove).
 - **⚠️ not yet built:** no toolchain in this environment (`pio` missing).
   MUST pass CI (`MKS_E3_V2`) before flashing. UBL + shaping RAM on
   F401 is the thing to watch in the CI build log.
+- **build ✅ `MKS_E3_V2` SUCCESS:** RAM 30.3% (19,860/65,536 B),
+  Flash 81.0% (212,296/262,144 B). Fixes the two SanityCheck breaks
+  found by the build (runout section above, `G29_RETRY_AND_RECOVER`
+  is Bilinear-only so UBL validates with `G26` instead).
+  Deliverables: `firmware/ZNP_ROBIN_NANO-UBL121.bin`,
+  `screen/TFT/Elegoo-N3Pro-stock-1.4.2.tft` + flashing README.
 
 ## [Unreleased] — `fix/safety-and-cleanup`
 

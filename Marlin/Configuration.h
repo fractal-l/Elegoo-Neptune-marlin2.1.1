@@ -2053,9 +2053,10 @@
  * RAMPS-based boards use SERVO3_PIN for the first runout sensor.
  * For other boards you may need to define FIL_RUNOUT_PIN, FIL_RUNOUT2_PIN, etc.
  */
-// Neptune 3 Pro has a filament runout switch on PB4 (FIL_RUNOUT_PIN).
-// LOW = filament NOT present. Enable by default; M412 S0 to disable.
-#define FILAMENT_RUNOUT_SENSOR
+// Runout is handled natively by the Elegoo TJC UI (polls CHECKFILEMENT0_PIN/PB4
+// directly and pushes nofilament pages). Do NOT enable the stock Marlin sensor:
+// DGUS_LCD_UI_MKS forbids it (SanityCheck) and it would double-trigger pauses.
+//#define FILAMENT_RUNOUT_SENSOR
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
   #define FIL_RUNOUT_ENABLED_DEFAULT true // Enable the sensor on startup. Override with M412 followed by M500.
   #define NUM_RUNOUT_SENSORS   1          // Number of sensors, up to one per extruder. Define a FIL_RUNOUT#_PIN for each.
