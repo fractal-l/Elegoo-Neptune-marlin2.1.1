@@ -5,6 +5,47 @@ Firmware for the Elegoo Neptune 3 PRO / PLUS / MAX, based on
 which is based on **Marlin 2.1.1** (upstream tag `398cae7`) with MKS E3D V2 board
 support and an Elegoo TJC touchscreen UI.
 
+## [Unreleased] — Neptune 3 Pro focus (UBL121 + shaping + upstream fixes)
+
+Decisions (per owner answers): single-model **Neptune 3 Pro** binary,
+SD-card flashing (no USB serial on stock board), A4988 standalone drivers,
+FractalUI dropped (not in `main` — confirmed, nothing to remove).
+
+- **base:** stay on **2.1.3-b3**. Checked upstream `2.1.2.8`: its delta
+  vs `2.1.2.7` is 5 commits, only 2 functional (both PID autotune).
+  `09564b92b9` (PID cleanup) is already in the 2.1.3-b3 base;
+  `194351cef5` (M303 C<3 endless-loop guard) is ported here
+  (`M303.cpp` + `temperature.cpp::PID_autotune`). A full downgrade
+  rebase to 2.1.2.8 would lose 2.1.3 features for zero gain.
+- **bed:** Bilinear → **UBL 11x11 = 121 points** (`GRID_MAX_POINTS_X 11`,
+  `OPTIMIZED_MESH_STORAGE`, `UBL_HILBERT_CURVE`, `UBL_MESH_WIZARD`,
+  `G29_RETRY_AND_RECOVER`, `G26_MESH_VALIDATION`, `PROBE_OFFSET_WIZARD`).
+  Probe clearances cut for 121-pt speed (`BETWEEN 5→3`, `MULTI 5→2`).
+  Screen button now runs `G29 P1 / P3.2 / S1 / F10.0 / A / M500`.
+  Stock screen has no 121-pt page, so mesh view decimates step-2 to the
+  36-pt `leveldata_36` page; full mesh stays in `bedlevel.z_values`.
+- **motion (best for F401/64K RAM, no USB):** `S_CURVE_ACCELERATION` +
+  `INPUT_SHAPING_X/Y` (ZV @ 35 Hz default, tune via `M593` in an SD
+  `.gcode` file + `M500`). `FT_MOTION` deliberately off (full retune +
+  more RAM). `LIN_ADVANCE` kept.
+- **sensors/safety:** `FILAMENT_RUNOUT_SENSOR` on (PB4, LOW = empty),
+  `EEPROM_AUTO_INIT`, `PID_EDIT_MENU` + `PID_AUTOTUNE_MENU`,
+  `PRINTCOUNTER` (save at end of print), `CANCEL_OBJECTS` + reporting,
+  `GCODE_MACROS`, `POWER_LOSS_MIN_Z_CHANGE 0.08→0.5` (less SD wear).
+- **identity:** `Version.h` now reports `Neptune 3 Pro` +
+  `SOURCE_CODE_URL github.com/fractal-l/Elegoo-Neptune-marlin2.1.1`
+  (was generic Marlin defaults — wrong for a distributed fork).
+- **flash:** `upload_protocol jlink → custom` SD-copy instructions;
+  platform stays pinned `ststm32@~12.1`.
+- **repo:** 6 MB release zips removed from git (use Releases),
+  CI builds only `main` + PRs with PlatformIO cache.
+- **UI split (step 1):** new `elegoo_pages.h` (page-name constants) +
+  `PAGES.md` (page map, UBL/SD-tuning notes); `bbl.h` include made
+  Bilinear-conditional, UBL display/trigger paths added.
+- **⚠️ not yet built:** no toolchain in this environment (`pio` missing).
+  MUST pass CI (`MKS_E3_V2`) before flashing. UBL + shaping RAM on
+  F401 is the thing to watch in the CI build log.
+
 ## [Unreleased] — `fix/safety-and-cleanup`
 
 Safety fixes and cleanup on top of the Elegoo fork (`be2bc9f`, `1.x.5.1b`):

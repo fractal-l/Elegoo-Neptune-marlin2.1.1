@@ -44,7 +44,11 @@
   #include "../../../../feature/babystep.h"
   #include "../../../../gcode/gcode.h"
   #include "../../../../../src/feature/bedlevel/bedlevel.h"
-  #include "../../../../../src/feature/bedlevel/abl/bbl.h"
+  #if ENABLED(AUTO_BED_LEVELING_BILINEAR)
+    #include "../../../../../src/feature/bedlevel/abl/bbl.h"
+  #elif ENABLED(AUTO_BED_LEVELING_UBL)
+    #include "../../../../../src/feature/bedlevel/ubl/ubl.h"
+  #endif
   
   #include "../../../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
   #include "../../../../lcd/extui/ui_api.h"
@@ -1006,6 +1010,34 @@
         }
       }
       queue.enqueue_now_P(PSTR("M420 S1"));
+    #endif
+    #if ENABLED(AUTO_BED_LEVELING_UBL)
+      // UBL 11x11 mesh -> stock Pro screen only has a 36-point (6x6) page
+      // (leveldata_36). Decimate step-2 (0,2,4,6,8,10) for display; full
+      // 121-pt mesh stays live in bedlevel.z_values (unified_bed_leveling) and EEPROM.
+      int8_t inStart, inStop, inInc, showcount;
+      showcount = 0;
+      bool zig = (6 & 1);
+      for (int y = 0; y < GRID_MAX_POINTS_Y; y += 2)
+      {
+        if (zig) { inStart = 0; inStop = GRID_MAX_POINTS_X; inInc = 2; }
+        else     { inStart = GRID_MAX_POINTS_X - 1; inStop = -1; inInc = -2; }
+        zig ^= true;
+        for (int x = inStart; x != inStop; x += inInc)
+        {
+          #if ENABLED(RTS_AVAILABLE)
+            RTS_SndData(bedlevel.z_values[x][y] * 1000, AUTO_BED_LEVEL_1POINT_VP + showcount * 2);
+          #endif
+          #if ENABLED(TJC_AVAILABLE)
+            char temp[32] = {0};
+            sprintf(temp, "leveldata_36.x%d.val=%d",(int)showcount,(int)(bedlevel.z_values[x][y]*100));
+            LCD_SERIAL_2.printf(temp);
+            LCD_SERIAL_2.printf("\xff\xff\xff");
+          #endif
+          showcount++;
+        }
+      }
+      queue.enqueue_now_P(PSTR("G29 A\nM420 S1"));
     #endif
     last_zoffset = zprobe_zoffset = probe.offset.z;
     #if ENABLED(RTS_AVAILABLE)
@@ -5544,7 +5576,11 @@
             waitway = 3;
             RTS_SndData(1, AUTO_BED_LEVEL_ICON_VP);
             RTS_SndData(ExchangePageBase + 38, ExchangepageAddr);
-            queue.enqueue_now_P(PSTR("G29"));
+            #if ENABLED(AUTO_BED_LEVELING_UBL)
+              queue.enqueue_now_P(PSTR("G29 P1\nG29 P3.2\nG29 S1\nG29 F10.0\nG29 A\nM500"));
+            #else
+              queue.enqueue_now_P(PSTR("G29"));
+            #endif
             planner.synchronize();
           #endif
         }
