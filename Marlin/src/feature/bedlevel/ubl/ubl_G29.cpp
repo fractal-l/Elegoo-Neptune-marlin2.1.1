@@ -689,28 +689,9 @@ void unified_bed_leveling::G29() {
     settings.store_mesh(param.KLS_storage_slot);
     storage_slot = param.KLS_storage_slot;
     #if ENABLED(RTS_AVAILABLE)
-      #if ENABLED(TJC_AVAILABLE)
-        // Decimated 36-pt preview for the stock leveldata_36 page (firmware mesh stays 121-pt)
-        {
-          int8_t inStart, inStop, inInc, showcount = 0;
-          bool zig = false;
-          for (int y = 0; y < GRID_MAX_POINTS_Y; y += 2)
-          {
-            if (zig) { inStart = 0; inStop = GRID_MAX_POINTS_X; inInc = 2; }
-            else     { inStart = GRID_MAX_POINTS_X - 1; inStop = -1; inInc = -2; }
-            zig ^= true;
-            for (int x = inStart; x != inStop; x += inInc)
-            {
-              char temp[32] = {0};
-              const float z = z_values[x][y];
-              sprintf(temp, "leveldata_36.x%d.val=%d", (int)showcount, isnan(z) ? 0 : (int)(z * 100));
-              LCD_SERIAL_2.printf(temp);
-              LCD_SERIAL_2.printf("\xff\xff\xff");
-              showcount++;
-            }
-          }
-        }
-      #endif
+      // NOTE: a 36-pt preview burst lived here (screenfix2) and correlated with
+      // a mainboard reset at finish. Reverted to the screenfix1 shape (store +
+      // flip only) to isolate. Preview will return via idle-trickle, not burst.
       RTS_AutoBedLevelPage();  // No-op unless the screen started leveling (waitway==3)
     #endif
 
