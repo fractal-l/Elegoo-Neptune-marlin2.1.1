@@ -689,6 +689,28 @@ void unified_bed_leveling::G29() {
     settings.store_mesh(param.KLS_storage_slot);
     storage_slot = param.KLS_storage_slot;
     #if ENABLED(RTS_AVAILABLE)
+      #if ENABLED(TJC_AVAILABLE)
+        // Decimated 36-pt preview for the stock leveldata_36 page (firmware mesh stays 121-pt)
+        {
+          int8_t inStart, inStop, inInc, showcount = 0;
+          bool zig = false;
+          for (int y = 0; y < GRID_MAX_POINTS_Y; y += 2)
+          {
+            if (zig) { inStart = 0; inStop = GRID_MAX_POINTS_X; inInc = 2; }
+            else     { inStart = GRID_MAX_POINTS_X - 1; inStop = -1; inInc = -2; }
+            zig ^= true;
+            for (int x = inStart; x != inStop; x += inInc)
+            {
+              char temp[32] = {0};
+              const float z = z_values[x][y];
+              sprintf(temp, "leveldata_36.x%d.val=%d", (int)showcount, isnan(z) ? 0 : (int)(z * 100));
+              LCD_SERIAL_2.printf(temp);
+              LCD_SERIAL_2.printf("\xff\xff\xff");
+              showcount++;
+            }
+          }
+        }
+      #endif
       RTS_AutoBedLevelPage();  // No-op unless the screen started leveling (waitway==3)
     #endif
 
@@ -824,6 +846,15 @@ void unified_bed_leveling::shift_mesh_height() {
         #if ENABLED(RTS_AVAILABLE)
           rtscheck.RTS_SndData(point_num, AUTO_BED_LEVEL_ICON_VP);
           rtscheck.RTS_SndData(isnan(measured_z) ? 0 : int32_t(measured_z * 1000), AUTO_BED_LEVEL_1POINT_VP + (point_num - 1) * 2);
+          #if ENABLED(TJC_AVAILABLE)
+            // Light up dots on the stock 36-dot progress picture (121 pts -> 36 dots)
+            char temp[32] = {0};
+            sprintf(temp, "leveling_36.q%d.picc=167", (int)((point_num - 1) * 36 / GRID_MAX_POINTS));
+            LCD_SERIAL_2.printf(temp);
+            LCD_SERIAL_2.printf("\xff\xff\xff");
+            LCD_SERIAL_2.printf("leveling_36.tm0.en=1");
+            LCD_SERIAL_2.printf("\xff\xff\xff");
+          #endif
         #endif
       }
       SERIAL_FLUSH(); // Prevent host M105 buffer overrun.
