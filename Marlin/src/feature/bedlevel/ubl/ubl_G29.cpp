@@ -44,6 +44,11 @@
   #include "../../../lcd/extui/ui_api.h"
 #endif
 
+// Elegoo TJC screen: live leveling progress + completion callback (mirrors abl/G29.cpp).
+#if ENABLED(RTS_AVAILABLE)
+  #include "../../../lcd/extui/dgus/elegoo/DGUSDisplayDef.h"
+#endif
+
 #if ENABLED(UBL_HILBERT_CURVE)
   #include "../hilbert_curve.h"
 #endif
@@ -683,6 +688,9 @@ void unified_bed_leveling::G29() {
 
     settings.store_mesh(param.KLS_storage_slot);
     storage_slot = param.KLS_storage_slot;
+    #if ENABLED(RTS_AVAILABLE)
+      RTS_AutoBedLevelPage();  // No-op unless the screen started leveling (waitway==3)
+    #endif
 
     SERIAL_ECHOLNPGM(STR_DONE);
   }
@@ -812,6 +820,10 @@ void unified_bed_leveling::shift_mesh_height() {
         #if ENABLED(EXTENSIBLE_UI)
           ExtUI::onMeshUpdate(best.pos, ExtUI::G29_POINT_FINISH);
           ExtUI::onMeshUpdate(best.pos, measured_z);
+        #endif
+        #if ENABLED(RTS_AVAILABLE)
+          rtscheck.RTS_SndData(point_num, AUTO_BED_LEVEL_ICON_VP);
+          rtscheck.RTS_SndData(isnan(measured_z) ? 0 : int32_t(measured_z * 1000), AUTO_BED_LEVEL_1POINT_VP + (point_num - 1) * 2);
         #endif
       }
       SERIAL_FLUSH(); // Prevent host M105 buffer overrun.
