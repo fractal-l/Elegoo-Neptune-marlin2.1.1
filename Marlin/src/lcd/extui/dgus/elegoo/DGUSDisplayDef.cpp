@@ -1015,16 +1015,16 @@
       // UBL 11x11 mesh -> stock Pro screen only has a 36-point (6x6) page
       // (leveldata_36). Decimate step-2 (0,2,4,6,8,10) for display; full
       // 121-pt mesh stays live in bedlevel.z_values (unified_bed_leveling) and EEPROM.
-      int8_t inStart, inStop, inInc, showcount;
-      showcount = 0;
-      bool zig = (6 & 1);
+      // NOTE: count-based loop (not sentinel `x != inStop`): with step 2 the
+      // stock stoppers (GRID_MAX_POINTS_X / -1) are unreachable and would hang boot.
+      int8_t showcount = 0;
+      bool zig = false;
+      const int8_t decim_count = (GRID_MAX_POINTS_X + 1) / 2; // 11 -> 6
       for (int y = 0; y < GRID_MAX_POINTS_Y; y += 2)
       {
-        if (zig) { inStart = 0; inStop = GRID_MAX_POINTS_X; inInc = 2; }
-        else     { inStart = GRID_MAX_POINTS_X - 1; inStop = -1; inInc = -2; }
-        zig ^= true;
-        for (int x = inStart; x != inStop; x += inInc)
+        for (int8_t i = 0; i < decim_count; i++)
         {
+          const int x = zig ? (GRID_MAX_POINTS_X - 1 - i * 2) : (i * 2);
           #if ENABLED(RTS_AVAILABLE)
             RTS_SndData(bedlevel.z_values[x][y] * 1000, AUTO_BED_LEVEL_1POINT_VP + showcount * 2);
           #endif
@@ -1036,6 +1036,7 @@
           #endif
           showcount++;
         }
+        zig ^= true;
       }
       queue.enqueue_now_P(PSTR("G29 A\nM420 S1"));
     #endif
