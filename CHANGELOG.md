@@ -197,7 +197,7 @@ host `ACTION`/prompt rework, `ADVANCE_K` (ex-`LIN_ADVANCE_K`), and the
 
 - All Elegoo hardware support (MKS_E3D_V2 board 5261, `MKS_E3_V2` env,
   `ZNP_ROBIN_NANO.bin` output) and the second LCD UART (`LCD_SERIAL_PORT 2`
-  + `LCD_SERIAL_PORT_2 6`).
+  - `LCD_SERIAL_PORT_2 6`).
 - The complete Elegoo TJC/DGUS screen stack (`lcd/extui/dgus/elegoo/`),
   error pages, M10088, M600/M75-M78/M24-M25 integration, live ABL mesh
   progress, and the RTS state machine in `DGUSDisplay::processRx()`.
@@ -213,7 +213,7 @@ host `ACTION`/prompt rework, `ADVANCE_K` (ex-`LIN_ADVANCE_K`), and the
 ### Key adaptations (2.1.1 → 2.1.3-b3 renames)
 
 | Fork (2.1.1) | Upstream (2.1.3-b3) |
-|---|---|
+| --- | --- |
 | `SDSUPPORT` (config option unchanged) | internal `HAS_MEDIA` |
 | `LCD_SET_PROGRESS_MANUALLY` | `SET_PROGRESS_PERCENT` |
 | `EITHER` / `BOTH` | `ANY` / `ALL` |
@@ -244,6 +244,6 @@ the upstream auto-fan sanity check is kept enabled.
 ### Size
 
 | | fork (2.1.1) | rebased (2.1.3-b3) |
-|---|---|---|
+| --- | --- | --- |
 | RAM | 26.0% (17024 B) | 26.2% (17144 B) |
 | Flash | 71.5% (187332 B) | 71.9% (188568 B) |
