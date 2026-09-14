@@ -5,6 +5,28 @@ Firmware for the Elegoo Neptune 3 PRO / PLUS / MAX, based on
 which is based on **Marlin 2.1.1** (upstream tag `398cae7`) with MKS E3D V2 board
 support and an Elegoo TJC touchscreen UI.
 
+## [Unreleased] — bring-up fixes (bisect + screen, Sep 2026)
+
+- **boot hang (fixed):** first UBL build never reached the screen — my
+  121→36 decimation loop in `RTS_Init` stepped ±2 against step-1
+  sentinels and never terminated. Bisect proved it (pure rebase booted,
+  Bilinear-only booted, UBL-only hung). Fixed with a count-based loop;
+  `ZNP_ROBIN_NANO-UBL121-FIXED.bin` boots on hardware.
+- **leveling progress on stock screen:** per-point dots during `G29 P1`
+  (probe hook, `leveling_36.q0–q35`), completion flip
+  (`RTS_AutoBedLevelPage`). Dots stop at ~22: the probe physically
+  can't reach 2 right columns + front/back rows of 11×11; the rest is
+  smart-filled. Honest count, not a bug.
+- **finish-reboot hunt (open):** screenfix2's 36-value preview burst in
+  the `G29 S` phase correlated with a mainboard reset at finish.
+  screenfix3 reverts to store+flip (the shape that completed cleanly)
+  keeping dots; M500 kept. Awaiting one leveling run: reboot or not.
+- **Z offset:** screen adjust is RAM-only (verbatim stock); persist via
+  an `M500` file or a Save key. Auto-save on confirm offered, not yet
+  implemented.
+- **kept binaries:** `BASE` (fallback), `FIXED` (known-good), `screenfix3`
+  (current). Bisect intermediates removed.
+
 ## [Unreleased] — Neptune 3 Pro focus (UBL121 + shaping + upstream fixes)
 
 Decisions (per owner answers): single-model **Neptune 3 Pro** binary,
