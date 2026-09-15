@@ -21,9 +21,14 @@ support and an Elegoo TJC touchscreen UI.
   the `G29 S` phase correlated with a mainboard reset at finish.
   screenfix3 reverts to store+flip (the shape that completed cleanly)
   keeping dots; M500 kept. Awaiting one leveling run: reboot or not.
-- **Z offset:** screen adjust is RAM-only (verbatim stock); persist via
-  an `M500` file or a Save key. Auto-save on confirm offered, not yet
-  implemented.
+- **settings never persist (root-caused, fixed):** Z-offset/mesh vanished
+  across pure power cycles. I2C EEPROM writes of the 121-pt mesh trip the
+  watchdog (reboot mid-save = the finish-reboot AND corrupted store =
+  silent reset-to-defaults every boot; cf. upstream #18219, #21436).
+  Fix: `SDCARD_EEPROM_EMULATION` — settings live in `eeprom.dat` on the
+  SD card (FLASH emulation impossible: no free 128KB sector on the
+  81%-full F401). Keep a card inserted at boot; first save creates the
+  file. Z-offset auto-saves (debounced) since the screen has no Save key.
 - **kept binaries:** `BASE` (fallback), `FIXED` (known-good), `screenfix3`
   (current). Bisect intermediates removed.
 

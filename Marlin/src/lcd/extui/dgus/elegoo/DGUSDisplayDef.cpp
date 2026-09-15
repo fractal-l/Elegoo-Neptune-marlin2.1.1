@@ -69,6 +69,21 @@
   float zprobe_zoffset;
   float last_zoffset = 0.0;
 
+  // Z-offset auto-save: the stock TJC screen has no Save key for the
+  // offset pages, so persist it here, debounced (a full I2C EEPROM write
+  // stalls motion ~0.5s, and hammering it on every ±0.1 click would
+  // freeze the UI). Side benefit: if the board ever resets on adjust,
+  // settings.save() is proven as the crash vector (cf. screenfix3).
+  static millis_t last_zoffset_save_ms = 0;
+  inline void save_zoffset_soon() {
+    #if ENABLED(EEPROM_SETTINGS)
+      const millis_t now = millis();
+      if (last_zoffset_save_ms && PENDING(now, last_zoffset_save_ms + 5000)) return;
+      last_zoffset_save_ms = now;
+      settings.save();
+    #endif
+  }
+
   //float rts_manual_feedrate_mm_m[] = {50 * 60, 50 * 60, 4 * 60, 150};
   float rts_manual_feedrate_mm_m[] = {50 * 60, 50 * 60, 4 * 60, 150};
 
@@ -952,7 +967,7 @@
       //bool zig = true;
       //bool zig = false;
 
-      bool zig = (GRID_MAX_POINTS_Y & 1);
+      bool zig = (GRID_MAX_POINTS_Y % 2);  // start parity for zigzag send
 
       int8_t inStart, inStop, inInc, showcount;
       showcount = 0;
@@ -3625,6 +3640,7 @@
           #if HAS_BED_PROBE
             probe.offset.z = zprobe_zoffset;
           #endif
+          save_zoffset_soon();
         #endif
       }
       break;
@@ -5440,6 +5456,7 @@
               #if HAS_BED_PROBE
                 probe.offset.z = zprobe_zoffset;
               #endif
+              save_zoffset_soon();
             }
 
             RTS_SndData(zprobe_zoffset * 100, AUTO_BED_LEVEL_ZOFFSET_VP);

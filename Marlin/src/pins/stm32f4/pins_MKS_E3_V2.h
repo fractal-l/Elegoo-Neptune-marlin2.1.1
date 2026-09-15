@@ -102,14 +102,15 @@
 #define CHECKFILEMENT0_PIN                PB4
 
 // Use one of these or SDCard-based Emulation will be used
-//#define SRAM_EEPROM_EMULATION                   // Use BackSRAM-based EEPROM emulation
-//#define FLASH_EEPROM_EMULATION                  // Use Flash-based EEPROM emulation
-#if ANY(NO_EEPROM_SELECTED, I2C_EEPROM)
-  #define I2C_EEPROM
-  #define MARLIN_EEPROM_SIZE                0x2000   //0x1000  // 4KB
-  #define I2C_SCL_PIN                       PB6
-  #define I2C_SDA_PIN                       PB7
-#endif
+// I2C_EEPROM deliberately NOT selected: 11x11 UBL mesh writes over slow I2C
+// trip the watchdog (reboot mid-save, corrupted store, nothing ever persists;
+// cf. upstream #18219 E3D "can't save at all", #21436). FLASH emulation is
+// also unusable (81%-full F401 has no free 128KB sector). Settings live in
+// "eeprom.dat" on the SD card instead - keep a card inserted at boot.
+#define SDCARD_EEPROM_EMULATION                   // Use SD-card file EEPROM emulation
+#define MARLIN_EEPROM_SIZE                0x2000  // 8KB store (file, no chip constraint)
+#define I2C_SCL_PIN                       PB6
+#define I2C_SDA_PIN                       PB7
 
 // Оn the servos connector
 #ifndef FIL_RUNOUT_PIN
