@@ -5485,6 +5485,7 @@
               #if HAS_BED_PROBE
                 probe.offset.z = zprobe_zoffset;
               #endif
+              save_zoffset_soon();
             }
             RTS_SndData(zprobe_zoffset * 100, AUTO_BED_LEVEL_ZOFFSET_VP);
             #if ENABLED(TJC_AVAILABLE) 
