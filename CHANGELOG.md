@@ -31,6 +31,10 @@ support and an Elegoo TJC touchscreen UI.
   file. Z-offset auto-saves (debounced) since the screen has no Save key.
 - **kept binaries:** `BASE` (fallback), `FIXED` (known-good), `screenfix3`
   (current). Bisect intermediates removed.
+- **stale Z-offset display (fixed):** the screen drew its values at boot
+  *before* settings finished loading (`onStartup` runs before
+  `first_load`), so the adjust page showed defaults until touched.
+  Values now re-sync after every settings load (`eepromfix2`).
 
 ## [Unreleased] — Neptune 3 Pro focus (UBL121 + shaping + upstream fixes)
 

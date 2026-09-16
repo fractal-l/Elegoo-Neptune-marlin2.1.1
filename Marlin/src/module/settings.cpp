@@ -794,6 +794,13 @@ void MarlinSettings::postprocess() {
   TERN_(HAS_LCD_BRIGHTNESS, ui.refresh_brightness());
   TERN_(HAS_BACKLIGHT_TIMEOUT, ui.refresh_backlight_timeout());
   TERN_(HAS_DISPLAY_SLEEP, ui.refresh_screen_timeout());
+
+  // Elegoo TJC screen caches Z-offset in RAM at onStartup (before first_load).
+  // Re-sync it here so the adjust pages show the loaded value after boot.
+  #if ENABLED(RTS_AVAILABLE)
+    extern void RTS_SyncZOffset();
+    RTS_SyncZOffset();
+  #endif
 }
 
 #if ALL(PRINTCOUNTER, EEPROM_SETTINGS)

@@ -75,6 +75,10 @@
   // freeze the UI). Side benefit: if the board ever resets on adjust,
   // settings.save() is proven as the crash vector (cf. screenfix3).
   static millis_t last_zoffset_save_ms = 0;
+  // Display sync: RTS_Init (via onStartup) runs BEFORE settings.first_load(),
+  // so boot-time screen values are build defaults. Refresh after every
+  // settings load/reset via MarlinSettings::postprocess().
+  void RTS_SyncZOffset() { last_zoffset = zprobe_zoffset = probe.offset.z; }
   inline void save_zoffset_soon() {
     #if ENABLED(EEPROM_SETTINGS)
       const millis_t now = millis();
