@@ -115,8 +115,13 @@ extern "C" {
 // Used when user instantiate a hardware Serial using its peripheral name.
 // Example: HardwareSerial mySerial(USART3);
 // will use PIN_SERIAL3_RX and PIN_SERIAL3_TX if defined.
-#define PIN_SERIAL1_RX          PA10
-#define PIN_SERIAL1_TX          PA9
+// Host serial (SERIAL_PORT 1) remapped from PA9/PA10 (USB/CH340) to PB6/PB7:
+// the USB-serial path on this board is damaged (R39/R40/R41 lost) and an
+// ESP8266 (ESP3D) is wired to the I2C_SCL/SDA nets instead (I2C EEPROM is
+// unused - SDCARD_EEPROM_EMULATION - so PB6/PB7 are free). NOTE: USB serial
+// stops working with this build; use SD card + screen + WiFi.
+#define PIN_SERIAL1_RX          PB7
+#define PIN_SERIAL1_TX          PB6
 #define PIN_SERIAL2_RX          PA3
 #define PIN_SERIAL2_TX          PA2
 

@@ -29,8 +29,18 @@ support and an Elegoo TJC touchscreen UI.
   SD card (FLASH emulation impossible: no free 128KB sector on the
   81%-full F401). Keep a card inserted at boot; first save creates the
   file. Z-offset auto-saves (debounced) since the screen has no Save key.
-- **kept binaries:** `BASE` (fallback), `FIXED` (known-good), `screenfix3`
-  (current). Bisect intermediates removed.
+- **kept binaries:** `BASE` (fallback), `FIXED` (known-good), `screenfix3`,
+  `espserial` (host UART moved to PB6/PB7, see below). Bisect intermediates removed.
+- **ESP8266 on USART1 via PB6/PB7:** the J17 header is USART2 (display
+  DGUS channel) — ESP there can never work. The USB-serial path died
+  with R39/R40/R41, so the host port (USART1) moved in firmware from
+  PA9/PA10 to PB6/PB7 (`PIN_SERIAL1_*` in the MKS_E3 variant; I2C EEPROM
+  is unused since the SD-emulation switch, confirmed no other PB6/PB7
+  users). Solder targets: AT24CS32 chip pins 5 (SDA=USART1_RX) / 6
+  (SCL=USART1_TX), or R5/R6 pull-up pads, or empty EEPROM pads.
+  Consequence: USB serial is dead in `espserial` builds (CH340 has
+  nothing to talk to) — SD + screen + WiFi only. Revert by flashing
+  any older binary.
 - **stale Z-offset display (fixed):** the screen drew its values at boot
   *before* settings finished loading (`onStartup` runs before
   `first_load`), so the adjust page showed defaults until touched.
